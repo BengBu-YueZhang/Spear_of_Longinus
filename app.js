@@ -1,14 +1,16 @@
-const app = require('koa')()
+const Koa = require('koa')
 const logger = require('koa-logger')
 const json = require('koa-json')
 const onerror = require('koa-onerror')
+const bodyParser = require('koa-bodyparser');
 
+const app = new Koa()
 const user = require('./routes/user')
 const index = require('./routes/index')
 
 onerror(app)
 
-app.use(require('koa-bodyparser')())
+app.use(bodyParser())
 app.use(json())
 app.use(logger())
 
