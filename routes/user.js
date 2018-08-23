@@ -41,4 +41,20 @@ router.delete('/', async (ctx) => {
 router.get('/list', async (ctx) => {
 })
 
+/**
+ * 用户登录
+ * @api /user/login
+ * @method GET
+ */
+router.get('/login', async (ctx) => {
+})
+
+/**
+ * 用户登出
+ * @api /user/logout
+ * @method GET
+ */
+router.get('/logout', async (ctx) => {
+})
+
 module.exports = router
