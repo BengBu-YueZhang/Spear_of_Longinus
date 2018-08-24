@@ -3,7 +3,7 @@ const logger = require('koa-logger')
 const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyParser = require('koa-bodyparser')
-const error = require('./middleware/error')
+const result = require('./middleware/result')
 const cors = require('cors')
 const mongo = require('./config/mongo')
 const redis = require('./config/redis')
@@ -30,7 +30,7 @@ app.use(cors({
 app.use(bodyParser())
 app.use(json())
 app.use(logger())
-app.use(error())
+app.use(result())
 
 app.use(user.routes(), user.allowedMethods())
 

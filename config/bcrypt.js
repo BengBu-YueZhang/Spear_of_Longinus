@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 
 module.exports = {
   /**
@@ -15,7 +15,8 @@ module.exports = {
   compare (old, val) {
     return new Promise((resolve, reject) => {
       bcrypt.compare(val, old, function(err, res) {
-        return res ? true : false
+        if (err) reject(false)
+        return res ? resolve(true) : reject(false)
       })
     })
   }

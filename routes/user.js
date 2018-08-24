@@ -1,4 +1,5 @@
 const Router = require('koa-router')
+const UserController = require('../controller/user.controller')
 const router = new Router({ prefix: 'user' })
 
 /**
@@ -7,6 +8,7 @@ const router = new Router({ prefix: 'user' })
  * @method GET
  */
 router.get('/', async (ctx) => {
+  console.log(ctx.request)
 })
 
 /**
@@ -15,6 +17,7 @@ router.get('/', async (ctx) => {
  * @method POST
  */
 router.post('/', async (ctx) => {
+  console.log(ctx.request)
 })
 
 /**
