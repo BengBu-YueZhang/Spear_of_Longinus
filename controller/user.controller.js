@@ -76,7 +76,7 @@ module.exports = {
 
   /**
    * 更新用户
-   * 角色用专门的接口，进行修改
+   * 角色用专门的接口，进行修改。密码进过了加盐只能重置，不能修改
    * @param {String} id 用户的objectid
    * @param {String} name 更新的用户名
    */
@@ -100,6 +100,28 @@ module.exports = {
       }).catch(() => {
         throw new Error('更新失败')
       }) 
+    } else {
+      ctx.throw(400, errMsg)
+    }
+  },
+
+  /**
+   * 删除用户
+   * @param {String} id 用户的objectid
+   */
+  async deleteUser (ctx, id) {
+    const validation = new Validation()
+    validation.add(id, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户id信息'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      return User.findOneAndRemove({
+        id: id
+      }).catch(() => {
+        throw new Error('删除失败')
+      })
     } else {
       ctx.throw(400, errMsg)
     }

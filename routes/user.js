@@ -47,6 +47,13 @@ router.post('/', async (ctx, next) => {
  * @method PUT
  */
 router.put('/', async (ctx) => {
+  let { id, name } = ctx.request.body
+  await UserController.updateUser(ctx, id, name)
+  ctx.result = {
+    code: 200,
+    data: { msg: 'success' }
+  }
+  await next()
 })
 
 /**
