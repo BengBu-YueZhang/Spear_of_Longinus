@@ -12,15 +12,6 @@ const router = new Router({
  */
 
 /**
- * 获取用户信息
- * @api /user/:id
- * @method GET
- */
-router.get('/:id', async (ctx) => {
-  ctx.body = 'Hello World'
-})
-
-/**
  * 添加用户
  * @api /user
  * @method POST
@@ -50,8 +41,27 @@ router.delete('/', async (ctx) => {
  * @api /user/list
  * @method GET
  */
-router.get('/list', async (ctx) => {
-  console.log(ctx.params)
+router.get('/list', async (ctx, next) => {
+  let { pagestart, pagesize } = ctx.request.query
+  pagestart = parseInt(pagestart, 10)
+  pagesize = parseInt(pagesize, 10)
+  const result = await UserController.users(pagestart, pagesize)
+  ctx.result = {
+    code: 200,
+    data: {
+      list: result
+    }
+  }
+  await next()
+})
+
+/**
+ * 获取用户信息
+ * @api /user/personal/:id
+ * @method GET
+ */
+router.get('/personal/:id', async (ctx) => {
+  ctx.body = 'Hello World'
 })
 
 /**

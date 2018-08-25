@@ -10,8 +10,15 @@ const USER_LOGIN_DB_INDEX = 1
 module.exports = {
   /**
    * 用户列表
+   * @param {Number} pagestart 开始
+   * @param {pagesize} pagesize 大小
    */
-  async users (filter) {
+  async users (pagestart = 1, pagesize = 10) {
+    const result = await User.find(null, null, {
+      skip: pagestart,
+      limit: pagesize
+    })
+    return Promise.resolve(result)
   },
 
   /**
