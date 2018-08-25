@@ -6,6 +6,7 @@ const { promisify } = require('util')
 const setAsync = promisify(redisClient.set).bind(redisClient)
 const selectAsync = promisify(redisClient.select).bind(redisClient)
 const USER_LOGIN_DB_INDEX = 1
+const Validation = require('../util/Validation')
 
 module.exports = {
   /**
@@ -26,12 +27,18 @@ module.exports = {
    * @param {String} id 用户的_id
    */
   async getUser (ctx, id) {
-    if (id) {
+    const validation = new Validation()
+    validation.add(id, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户id信息'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
       return await User.findOne({ _id: id }).catch(() => {
         ctx.throw(400, 'id不存在')
       })
     } else {
-      ctx.throw(400, '缺少用户id信息')
+      ctx.throw(400, errMsg)
     }
   },
 
@@ -43,7 +50,17 @@ module.exports = {
    */
   async addUser (ctx, name, password, role) {
     let user = null
-    if (name && password) {
+    const validation = new Validation()
+    validation.add(name, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺失用户名'
+    }])
+    validation.add(password, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺失密码'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
       user = await User.findOne({ name })
       if (user) throw new Error('用户名已被注册')
       // 密码加盐
@@ -53,8 +70,23 @@ module.exports = {
         throw new Error('添加失败')
       })
     } else {
-      ctx.throw(400, '缺少参数')
+      ctx.throw(400, errMsg)
     }
+  },
+
+  /**
+   * 更新用户
+   * 角色用专门的接口，进行修改
+   * @param {String} id 用户的objectid
+   * @param {String} name 更新的用户名
+   * @param {String} password 密码
+   */
+  async updateUser (ctx, id, name, password) {
+    // if (name && password) {
+    //   return await User.findOneAndUpdate()
+    // } else {
+    //   ctx.throw(400, '缺少参数')
+    // }
   },
 
   /**
