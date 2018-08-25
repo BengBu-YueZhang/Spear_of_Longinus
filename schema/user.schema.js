@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+/**
+ * 用户模型
+ */
 const UserSchema = new Schema({
   // 用户名
   name: {
