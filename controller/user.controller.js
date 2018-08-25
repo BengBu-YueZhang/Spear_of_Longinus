@@ -5,8 +5,8 @@ const redisClient = require('../config/redis')
 const { promisify } = require('util')
 const setAsync = promisify(redisClient.set).bind(redisClient)
 const selectAsync = promisify(redisClient.select).bind(redisClient)
-const USER_LOGIN_DB_INDEX = 1
 const Validation = require('../util/Validation')
+const USER_LOGIN_DB_INDEX = 1
 
 module.exports = {
   /**
