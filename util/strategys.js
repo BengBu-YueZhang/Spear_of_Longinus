@@ -9,6 +9,12 @@ const strategys = {
     if (!R.complement(R.isNil)(val)) {
       return errMsg
     }
+  },
+
+  isNotNullString (val, errMsg) {
+    if (R.trim(val) === '') {
+      return errMsg
+    }
   }
 }
 

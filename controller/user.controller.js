@@ -53,11 +53,11 @@ module.exports = {
     const validation = new Validation()
     validation.add(name, [{
       strategy: 'isNotEmpty',
-      errMsg: '缺失用户名'
+      errMsg: '缺少用户名'
     }])
     validation.add(password, [{
       strategy: 'isNotEmpty',
-      errMsg: '缺失密码'
+      errMsg: '缺少密码'
     }])
     const errMsg = validation.start()
     if (!errMsg) {
@@ -79,14 +79,30 @@ module.exports = {
    * 角色用专门的接口，进行修改
    * @param {String} id 用户的objectid
    * @param {String} name 更新的用户名
-   * @param {String} password 密码
    */
-  async updateUser (ctx, id, name, password) {
-    // if (name && password) {
-    //   return await User.findOneAndUpdate()
-    // } else {
-    //   ctx.throw(400, '缺少参数')
-    // }
+  async updateUser (ctx, id, name) {
+    const validation = new Validation()
+    validation.add(name, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户名'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '用户名不能为空字符串'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      return await User.findOneAndUpdate({
+        _id: id
+      }, {
+        $set: {
+          name: name
+        }
+      }).catch(() => {
+        throw new Error('更新失败')
+      }) 
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**
