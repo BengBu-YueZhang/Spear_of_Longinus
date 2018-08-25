@@ -13,7 +13,7 @@ module.exports = {
    * @param {Number} pagestart 开始
    * @param {pagesize} pagesize 大小
    */
-  async users (pagestart = 1, pagesize = 10) {
+  async getUsers (ctx, pagestart = 1, pagesize = 10) {
     const result = await User.find(null, null, {
       skip: pagestart,
       limit: pagesize
@@ -22,16 +22,39 @@ module.exports = {
   },
 
   /**
-   * 添加用户(用户注册)
-   * @param {Object} info 用户信息
+   * 获取用户的信息
+   * @param {String} id 用户的_id
    */
-  async addUser (info) {
-    let { name, password } = info
-    const user = await User.findOne({ name })
-    if (user) throw new Error('用户名已被注册')
-    password = bcrypt.encrypt(password)
-    let user = new User({name, password})
-    return await user.save()
+  async getUser (ctx, id) {
+    if (id) {
+      return await User.findOne({ _id: id }).catch(() => {
+        ctx.throw(400, 'id不存在')
+      })
+    } else {
+      ctx.throw(400, '缺少用户id信息')
+    }
+  },
+
+  /**
+   * 添加用户(用户注册)
+   * @param {String} name 用户名
+   * @param {String} password 密码
+   * @param {Array} role 角色集
+   */
+  async addUser (ctx, name, password, role) {
+    let user = null
+    if (name && password) {
+      user = await User.findOne({ name })
+      if (user) throw new Error('用户名已被注册')
+      // 密码加盐
+      password = bcrypt.encrypt(password)
+      user = new User({name, password, role})
+      return await user.save().catch(() => {
+        throw new Error('添加失败')
+      })
+    } else {
+      ctx.throw(400, '缺少参数')
+    }
   },
 
   /**

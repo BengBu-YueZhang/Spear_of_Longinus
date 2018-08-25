@@ -12,12 +12,33 @@ const router = new Router({
  */
 
 /**
+ * 获取用户
+ * @api /user
+ * @method GET
+ */
+router.get('/', async (ctx, next) => {
+  let { id } = ctx.request.query
+  const result = await UserController.getUser(ctx, id)
+  ctx.result = {
+    code: 200,
+    data: { data: result, msg: 'success' }
+  }
+  await next()
+})
+
+/**
  * 添加用户
  * @api /user
  * @method POST
  */
-router.post('/', async (ctx) => {
-  console.log(ctx.request)
+router.post('/', async (ctx, next) => {
+  let { name, password, role } = ctx.request.body
+  await UserController.addUser(ctx, name, password, role)
+  ctx.result = {
+    code: 200,
+    data: { msg: 'success' }
+  }
+  await next()
 })
 
 /**
@@ -45,23 +66,12 @@ router.get('/list', async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
   pagestart = parseInt(pagestart, 10)
   pagesize = parseInt(pagesize, 10)
-  const result = await UserController.users(pagestart, pagesize)
+  const result = await UserController.getUsers(ctx, pagestart, pagesize)
   ctx.result = {
     code: 200,
-    data: {
-      list: result
-    }
+    data: { list: result, msg: 'success' }
   }
   await next()
-})
-
-/**
- * 获取用户信息
- * @api /user/personal/:id
- * @method GET
- */
-router.get('/personal/:id', async (ctx) => {
-  ctx.body = 'Hello World'
 })
 
 /**
