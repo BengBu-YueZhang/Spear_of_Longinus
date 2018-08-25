@@ -10,6 +10,7 @@ module.exports = function () {
         ctx.response.status = 200
         ctx.response.body = result
       }
+      await next()
     } catch (error) {
       ctx.response.type = 'json'
       ctx.response.status = error.status || 500

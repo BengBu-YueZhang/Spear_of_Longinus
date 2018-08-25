@@ -9,7 +9,7 @@ const USER_LOGIN_DB_INDEX = 1
 
 module.exports = {
   /**
-   * 
+   * 用户列表
    */
   async users (filter) {
   },

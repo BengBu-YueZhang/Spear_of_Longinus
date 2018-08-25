@@ -1,10 +1,9 @@
 const Koa = require('koa')
 const logger = require('koa-logger')
 const json = require('koa-json')
-const onerror = require('koa-onerror')
 const bodyParser = require('koa-bodyparser')
 const result = require('./middleware/result')
-const cors = require('cors')
+const cors = require('@koa/cors');
 const mongo = require('./config/mongo')
 const redis = require('./config/redis')
 
@@ -12,8 +11,6 @@ const app = new Koa()
 const user = require('./routes/user')
 
 mongo.connect()
-
-onerror(app)
 app.use(cors({
   origin: 'http://127.0.0.1:8080',
   credentials: true,
@@ -32,7 +29,9 @@ app.use(json())
 app.use(logger())
 app.use(result())
 
+// 路由
 app.use(user.routes(), user.allowedMethods())
+
 
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)

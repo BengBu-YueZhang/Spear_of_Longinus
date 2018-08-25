@@ -1,14 +1,23 @@
 const Router = require('koa-router')
 const UserController = require('../controller/user.controller')
-const router = new Router({ prefix: 'user' })
+const router = new Router({
+  prefix: '/user'
+})
+
+/**
+ * 全部的路由使用中间件:
+ * router.use(session()).use(authorize())
+ * 单个的路由使用中间件:
+ * router.use('/users', userAuth())
+ */
 
 /**
  * 获取用户信息
- * @api /user
+ * @api /user/:id
  * @method GET
  */
-router.get('/', async (ctx) => {
-  console.log(ctx.request)
+router.get('/:id', async (ctx) => {
+  ctx.body = 'Hello World'
 })
 
 /**
@@ -42,6 +51,7 @@ router.delete('/', async (ctx) => {
  * @method GET
  */
 router.get('/list', async (ctx) => {
+  console.log(ctx.params)
 })
 
 /**
