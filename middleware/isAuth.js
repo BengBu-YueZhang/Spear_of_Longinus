@@ -23,11 +23,11 @@ module.exports = function (model, auth) {
           const { id, role } = decoded
           getAsync(id).then(res => {
             if (!res) return ctx.throw(403, 'token失效')
-            // 传递给接口权限中间件进行权限控制
             ctx.decoded = decoded
             if (!model || !auth) {
               next()
             } else {
+              // 接口权限验证
               acl.areAnyRolesAllowed(role, model, auth, function (err, result) {
                 if (result) {
                   next()

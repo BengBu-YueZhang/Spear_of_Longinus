@@ -3,16 +3,13 @@
 const Acl = require('acl')
 const R = require('ramda')
 const redisClient = require('./redis')
-const { promisify } = require('util')
 const Role = require('../model/role.model')
 
 let acl = new Acl(new Acl.redisBackend(redisClient))
 
 module.exports = {
   /**
-   * postman
-   * 使用array参数：https://medium.com/@darilldrems/how-to-send-arrays-with-get-or-post-request-in-postman-f87ca70b154e
-   * 初始化角色系统
+   * 初始化角色权限系统
    * acl.allow([
    *    {
    *      roles: ['角色1'],
@@ -30,6 +27,10 @@ module.exports = {
    * ])
    */
   acl,
+
+  /**
+   * 初始化权限
+   */
   async initRole () {
     try {
       let pagestart = 1
