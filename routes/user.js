@@ -21,7 +21,10 @@ router.get('/', async (ctx, next) => {
   const result = await UserController.getUser(ctx, id)
   ctx.result = {
     code: 200,
-    data: { data: result, msg: 'success' }
+    data: {
+      data: result,
+      msg: 'success'
+    }
   }
   await next()
 })
@@ -36,7 +39,9 @@ router.post('/', async (ctx, next) => {
   await UserController.addUser(ctx, name, password, role)
   ctx.result = {
     code: 200,
-    data: { msg: 'success' }
+    data: {
+      msg: 'success'
+    }
   }
   await next()
 })
@@ -51,7 +56,9 @@ router.put('/', async (ctx) => {
   await UserController.updateUser(ctx, id, name)
   ctx.result = {
     code: 200,
-    data: { msg: 'success' }
+    data: {
+      msg: 'success'
+    }
   }
   await next()
 })
@@ -62,6 +69,15 @@ router.put('/', async (ctx) => {
  * @method DELETE
  */
 router.delete('/', async (ctx) => {
+  let { id } = ctx.request.query
+  await UserController.deleteUser(ctx, id)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**
@@ -84,9 +100,18 @@ router.get('/list', async (ctx, next) => {
 /**
  * 用户登录
  * @api /user/login
- * @method GET
+ * @method POST
  */
-router.get('/login', async (ctx) => {
+router.post('/login', async (ctx) => {
+  let { name, password } = ctx.request.body
+  const result = await UserController.login(ctx, name, password)
+  ctx.result = {
+    code: 200,
+    data: {
+      token: result,
+      msg: 'success'
+    }
+  }
 })
 
 /**

@@ -31,6 +31,9 @@ module.exports = {
     validation.add(id, [{
       strategy: 'isNotEmpty',
       errMsg: '缺少用户id信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '缺少用户id信息'
     }])
     const errMsg = validation.start()
     if (!errMsg) {
@@ -54,10 +57,16 @@ module.exports = {
     validation.add(name, [{
       strategy: 'isNotEmpty',
       errMsg: '缺少用户名'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '用户名不能为空字符串'
     }])
     validation.add(password, [{
       strategy: 'isNotEmpty',
       errMsg: '缺少密码'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '密码不能为空字符串'
     }])
     const errMsg = validation.start()
     if (!errMsg) {
@@ -114,6 +123,9 @@ module.exports = {
     validation.add(id, [{
       strategy: 'isNotEmpty',
       errMsg: '缺少用户id信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '缺少用户id信息'
     }])
     const errMsg = validation.start()
     if (!errMsg) {
@@ -129,20 +141,48 @@ module.exports = {
 
   /**
    * 用户登录, 使用动态jwt的密钥
-   * @param {Object} info 用户信息
+   * @param {String} name 用户名
+   * @param {String} password 用户密码
    */
-  async login (info) {
+  async login (ctx, name, password) {
     let { name, password } = info
-    const user = await User.findOne({ name })
-    if (!user) throw new Error('用户不存在')
-    const equal = await bcrypt.compare(user.password, password)
-    if (!equal) throw new Error('用户或密码错误')
-    // 动态jwt密钥, 使用secret和password的组合, 可以避免在用户更改密码后, token仍然有效
-    const dynamicSecret = `${secret}${user.password}`
-    const token = jwt.sign({ id: user._id }, dynamicSecret, { expiresIn: 60 * 60 * 24 })
-    const redisKey = user._id.toString()
-    await selectAsync(USER_LOGIN_DB_INDEX)
-    await setAsync(redisKey, token, 'EX', 60 * 60 * 24)
-    return Promise.resolve({ token })
+    const validation = new Validation()
+    validation.add(name, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少name信息'
+    }])
+    validation.add(password, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少password信息'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      const user = await User.findOne({ name })
+      if (!user) throw new Error('用户不存在')
+      // 加盐的密码进行对比
+      const equal = await bcrypt.compare(user.password, password)
+      if (!equal) throw new Error('用户或密码错误')
+      // 动态jwt密钥, 使用secret(密钥)和password的组合, 可以避免在用户更改密码后, token仍然有效
+      // 用户重置密码后, 清楚在redis中登录信息，重新登录
+      const dynamicSecret = `${secret}${user.password}`
+      const token = jwt.sign({
+        id: user._id,
+        role: user.role
+      }, dynamicSecret, { expiresIn: 60 * 60 * 24 })
+      // redis中保存token信息
+      const redisKey = user._id.toString()
+      await selectAsync(USER_LOGIN_DB_INDEX)
+      await setAsync(redisKey, token, 'EX', 60 * 60 * 24)
+      // 返回token信息
+      return Promise.resolve({ token })
+    } else {
+      ctx.throw(400, errMsg)
+    }
+  },
+
+  /**
+   * 用户登出
+   */
+  async logout () {
   }
 }

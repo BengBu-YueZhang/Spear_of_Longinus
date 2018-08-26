@@ -12,7 +12,8 @@ module.exports = function (ctx, next) {
         ctx.throw(403, 'token已过期')
       } else {
         // 使用redis进行登录的验证, 避免没有登录的时候, 使用之前的token进行访问
-        const { id } = decoded
+        // 从token中获取id信息以及角色信息
+        const { id, role } = decoded
         getAsync(id).then(res => {
           if (!res) return ctx.throw(403, 'token失效')
           ctx.decoded = decoded
