@@ -32,11 +32,9 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Role.find(null, null, {
+      return await Role.find(null, '_id name code', {
         skip: pagestart,
         limit: pagesize
-      }).populate({
-        path: 'auths'
       }).catch(() => {
         throw new Error('查询失败')
       })
@@ -47,8 +45,29 @@ module.exports = {
 
   /**
    * 获取单个角色的详情信息
+   * @param {String} id 角色的ObjectId
    */
-  getRole () {
+  async getRole (ctx, id) {
+    const validation = new Validation()
+    validation.add(id, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户id信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '缺少用户id信息'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      return await Role.findById({
+        _id: id
+      }, 'code name auths _id').populate({
+        path: 'auths'
+      }).catch(() => {
+        throw new Error('查询失败')
+      })
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**

@@ -28,7 +28,7 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await User.find(null, null, {
+      return await User.find(null, '_id name createDate', {
         skip: pagestart,
         limit: pagesize
       }).catch(() => {
@@ -57,7 +57,12 @@ module.exports = {
       return await User.findOne(
         { _id: id },
         'createDate name role'
-      ).catch(() => {
+      ).populate({
+        path: 'roles',
+        populate: {
+          path: 'auths'
+        }
+      }).catch(() => {
         ctx.throw(400, 'id不存在')
       })
     } else {

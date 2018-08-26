@@ -14,15 +14,28 @@ router.get('/list', async (ctx, next) => {
   const result = await RoleController.getRoles(ctx, pagestart, pagesize)
   ctx.result = {
     code: 200,
-    data: { list: result, msg: 'success' }
+    data: {
+      list: result,
+      msg: 'success'
+    }
   }
   await next()
 })
 
 /**
- * 获取角色
+ * 获取单个角色信息
  */
 router.get('/', async (ctx, next) => {
+  const { id } = ctx.request.query
+  const result = await RoleController.getRole(ctx, id)
+  ctx.result = {
+    code: 200,
+    data: {
+      data: result,
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**
