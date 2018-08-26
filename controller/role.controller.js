@@ -152,7 +152,26 @@ module.exports = {
 
   /**
    * 删除角色信息
+   * @param {String} id 角色的ObjectId
    */
-  deleteRole () {
+  deleteRole (ctx, id) {
+    const validation = new Validation()
+    validation.add(id, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户id信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '缺少用户id信息'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      return await Role.findByIdAndUpdate({
+        _id: id
+      }).catch(() => {
+        throw new Error('删除失败')
+      })
+    } else {
+      ctx.throw(400, errMsg)
+    }
   }
 }
