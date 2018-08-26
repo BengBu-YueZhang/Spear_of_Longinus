@@ -5,10 +5,8 @@ const redisClient = require('../config/redis')
 const { promisify } = require('util')
 const setAsync = promisify(redisClient.set).bind(redisClient)
 const delAsync = promisify(redisClient.del).bind(redisClient)
-const selectAsync = promisify(redisClient.select).bind(redisClient)
 const Validation = require('../util/Validation')
 const jwt =require('jsonwebtoken')
-const USER_LOGIN_DB_INDEX = 1
 const pagination = require('../util/pagination')
 
 module.exports = {
@@ -207,7 +205,6 @@ module.exports = {
       }, dynamicSecret, { expiresIn: 60 * 60 * 24 })
       // redis中保存token信息
       const redisKey = user._id.toString()
-      await selectAsync(USER_LOGIN_DB_INDEX)
       await setAsync(redisKey, token, 'EX', 60 * 60 * 24)
       // 返回token信息
       return Promise.resolve({ token })
@@ -232,7 +229,6 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       // 清除redis中保存的会话信息
-      await selectAsync(USER_LOGIN_DB_INDEX)
       await delAsync(id)
     } else {
       ctx.throw(400, errMsg)

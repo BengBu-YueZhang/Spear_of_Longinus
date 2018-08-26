@@ -6,6 +6,7 @@ const result = require('./middleware/result')
 const cors = require('@koa/cors');
 const mongo = require('./config/mongo')
 const redis = require('./config/redis')
+const acl = require('./config/acl').initRole()
 
 const app = new Koa()
 const UserRouter = require('./routes/user')

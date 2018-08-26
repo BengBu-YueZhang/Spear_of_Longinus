@@ -1,22 +1,9 @@
 const Validation = require('../util/Validation')
 const Role = require('../model/role.model')
-const redisClient = require('../config/redis')
-const { promisify } = require('util')
 const User = require('../model/user.model')
 const pagination = require('../util/pagination')
-const Acl = require('acl')
-const ACL_DB_INDEX = 2
-const selectAsync = promisify(redisClient.select).bind(redisClient)
-const R = require('ramda')
 
 module.exports = {
-  /**
-   * 初始化角色权限系统
-   * 将权限信息加载到redis中
-   */
-  async init () {
-  },
-
   /**
    * 获取角色列表
    * @param {Number} pagestart
@@ -66,7 +53,7 @@ module.exports = {
       return await Role.findById({
         _id: id
       }, 'code name auths _id').populate({
-        path: 'auth'
+        path: 'auths'
       }).catch(() => {
         throw new Error('查询失败')
       })
