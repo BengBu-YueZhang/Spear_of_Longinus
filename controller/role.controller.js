@@ -1,8 +1,8 @@
 const Validation = require('../util/Validation')
 const Role = require('../model/role.model')
-const User = require('../model/user.model')
 const redisClient = require('../config/redis')
 const { promisify } = require('util')
+const User = require('../model/user.model')
 const Acl = require('acl')
 const ACL_DB_INDEX = 2
 const selectAsync = promisify(redisClient.select).bind(redisClient)
@@ -11,6 +11,7 @@ const R = require('ramda')
 module.exports = {
   /**
    * 初始化角色权限系统
+   * 将权限信息加载到redis中
    */
   init () {
   },
@@ -151,7 +152,7 @@ module.exports = {
   },
 
   /**
-   * 删除角色信息
+   * 删除角色信息, 因为用户表关联了角色信息，所以需要将用户表中对应的角色id同时删除了
    * @param {String} id 角色的ObjectId
    */
   deleteRole (ctx, id) {
@@ -165,8 +166,18 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Role.findByIdAndUpdate({
-        _id: id
+      return await User.updateMany({
+        roles: {
+          $all: [id]
+        }
+      }, {
+        $pullAll: {
+          roles: [id]
+        }
+      }).then(async () => {
+        return await Role.findByIdAndUpdate({
+          _id: id
+        })
       }).catch(() => {
         throw new Error('删除失败')
       })
