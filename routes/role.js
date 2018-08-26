@@ -57,6 +57,15 @@ router.post('/', async (ctx, next) => {
  * 更新角色
  */
 router.put('/', async (ctx, next) => {
+  const { id, name, auths } = ctx.request.body
+  await RoleController.updateRole(ctx, code, name, auths)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**

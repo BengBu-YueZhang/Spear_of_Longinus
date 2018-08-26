@@ -129,7 +129,7 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await User.findOneAndUpdate({
+      return await User.findByIdAndUpdate({
         _id: id
       }, {
         $set: {

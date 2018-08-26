@@ -109,8 +109,45 @@ module.exports = {
 
   /**
    * 更新角色信息
+   * @param {String} id 角色id
+   * @param {String} name 角色名
+   * @param {Array} auths 角色权限集
    */
-  updateRole () {
+  updateRole (ctx, id, name, auths = []) {
+    const validation = new Validation()
+    validation.add(id, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户id信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '缺少用户id信息'
+    }])
+    validation.add(name, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少角色name信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: 'name不能为空字符串'
+    }])
+    validation.add(auths, [{
+      strategy: 'isArray',
+      errMsg: 'auths必须为数组'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      return await Role.findByIdAndUpdate({
+        _id: id
+      }, {
+        $set: {
+          name: name,
+          auths: auths
+        }
+      }).catch(() => {
+        throw new Error('更新失败')
+      })
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**
