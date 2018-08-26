@@ -8,7 +8,9 @@ const mongo = require('./config/mongo')
 const redis = require('./config/redis')
 
 const app = new Koa()
-const user = require('./routes/user')
+const UserRouter = require('./routes/user')
+const RoleRouter = require('./routes/role')
+const AuthRouter = require('./routes/auth')
 
 mongo.connect()
 app.use(cors({
@@ -30,8 +32,9 @@ app.use(logger())
 app.use(result())
 
 // 路由
-app.use(user.routes(), user.allowedMethods())
-
+app.use(UserRouter.routes(), UserRouter.allowedMethods())
+app.use(RoleRouter.routes(), RoleRouter.allowedMethods())
+app.use(AuthRouter.routes(), AuthRouter.allowedMethods())
 
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)

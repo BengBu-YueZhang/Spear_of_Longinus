@@ -17,11 +17,26 @@ module.exports = {
    * @param {pagesize} pagesize 大小
    */
   async getUsers (ctx, pagestart = 1, pagesize = 10) {
-    const result = await User.find(null, null, {
-      skip: pagestart,
-      limit: pagesize
-    })
-    return Promise.resolve(result)
+    const validation = new Validation()
+    validation.add(pagestart, [{
+      strategy: 'isNumber',
+      errMsg: '参数类型不正确'
+    }])
+    validation.add(pagesize, [{
+      strategy: 'isNumber',
+      errMsg: '参数类型不正确'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      return await User.find(null, null, {
+        skip: pagestart,
+        limit: pagesize
+      }).catch(() => {
+        throw new Error('查询失败')
+      })
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**

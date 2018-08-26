@@ -15,6 +15,15 @@ const strategys = {
     if (R.trim(val) === '') {
       return errMsg
     }
+  },
+
+  /**
+   * 判断数字策略
+   */
+  isNumber (val, errMsg) {
+    if (R.identical(NaN, val) || val === Infinity || val === -Infinity || !R.is(Number, val)) {
+      return errMsg
+    }
   }
 }
 
