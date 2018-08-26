@@ -7,6 +7,7 @@ const setAsync = promisify(redisClient.set).bind(redisClient)
 const delAsync = promisify(redisClient.del).bind(redisClient)
 const selectAsync = promisify(redisClient.select).bind(redisClient)
 const Validation = require('../util/Validation')
+const jwt =require('jsonwebtoken')
 const USER_LOGIN_DB_INDEX = 1
 
 module.exports = {
@@ -38,7 +39,10 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await User.findOne({ _id: id }).catch(() => {
+      return await User.findOne(
+        { _id: id },
+        'createDate name role'
+      ).catch(() => {
         ctx.throw(400, 'id不存在')
       })
     } else {
@@ -120,6 +124,9 @@ module.exports = {
    * @param {String} id 用户的objectid
    */
   async deleteUser (ctx, id) {
+    // 使用findOneAndRemove会有问题
+    // 参考: https://stackoverflow.com/questions/30417389/the-findoneandremove-and-findoneandupdate-dont-work-as-intended
+    // 使用findByIdAndRemove
     const validation = new Validation()
     validation.add(id, [{
       strategy: 'isNotEmpty',
@@ -130,9 +137,10 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return User.findOneAndRemove({
-        id: id
-      }).catch(() => {
+      return User.findByIdAndRemove({
+        _id: id
+      }).catch((err) => {
+        console.log(err)
         throw new Error('删除失败')
       })
     } else {
@@ -146,7 +154,6 @@ module.exports = {
    * @param {String} password 用户密码
    */
   async login (ctx, name, password) {
-    let { name, password } = info
     const validation = new Validation()
     validation.add(name, [{
       strategy: 'isNotEmpty',

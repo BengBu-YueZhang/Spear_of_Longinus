@@ -51,7 +51,7 @@ router.post('/', async (ctx, next) => {
  * @api /user
  * @method PUT
  */
-router.put('/', async (ctx) => {
+router.put('/', async (ctx, next) => {
   let { id, name } = ctx.request.body
   await UserController.updateUser(ctx, id, name)
   ctx.result = {
@@ -68,7 +68,7 @@ router.put('/', async (ctx) => {
  * @api /user
  * @method DELETE
  */
-router.delete('/', async (ctx) => {
+router.delete('/', async (ctx, next) => {
   let { id } = ctx.request.query
   await UserController.deleteUser(ctx, id)
   ctx.result = {
@@ -102,7 +102,7 @@ router.get('/list', async (ctx, next) => {
  * @api /user/login
  * @method POST
  */
-router.post('/login', async (ctx) => {
+router.post('/login', async (ctx, next) => {
   let { name, password } = ctx.request.body
   const result = await UserController.login(ctx, name, password)
   ctx.result = {
@@ -120,7 +120,7 @@ router.post('/login', async (ctx) => {
  * @api /user/logout
  * @method GET
  */
-router.get('/logout', async (ctx) => {
+router.post('/logout', async (ctx, next) => {
   let { id } = ctx.request.body
   await UserController.logout(ctx, id)
   ctx.result = {
