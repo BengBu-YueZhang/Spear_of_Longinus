@@ -9,24 +9,64 @@ const router = new Router({
  * 获取权限列表
  */
 router.get('/list', async (ctx, next) => {
+  const { pagestart, pagesize } = ctx.request.query
+  pagestart = parseInt(pagestart, 10)
+  pagesize = parseInt(pagesize, 10)
+  const result = await AuthController.getAuths(ctx, pagestart, pagesize)
+  ctx.result = {
+    code: 200,
+    data: {
+      list: result,
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**
  * 获取权限
  */
 router.get('/', async (ctx, next) => {
+  const { id } = ctx.request.query
+  const result = await AuthController.getAuth(ctx, id)
+  ctx.result = {
+    code: 200,
+    data: {
+      data: result,
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**
  * 添加权限
  */
 router.post('/', async (ctx, next) => {
+  const { code, name, group } = ctx.request.body
+  await AuthController.addAuth(ctx, code, name, group)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**
  * 更新权限
  */
 router.put('/', async (ctx, next) => {
+  const { id, name, group } = ctx.request.body
+  await AuthController.updateAuth(ctx, id, name, group)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**
@@ -34,6 +74,51 @@ router.put('/', async (ctx, next) => {
  * 需要将管理的角色权限一并删除
  */
 router.delete('/', async (ctx, next) => {
+  const { id } = ctx.request.query
+  await AuthController.deleteAuth(ctx, id)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
+})
+
+router.get('/group', async (ctx, next) => {
+  const result = await AuthController.getAuthGroup()
+  ctx.result = {
+    code: 200,
+    data: {
+      list: result,
+      msg: 'success'
+    }
+  }
+  await next()
+})
+
+router.delete('/group', async (ctx, next) => {
+  const { group } = ctx.request.query
+  await AuthController.deleteAuthGroup(ctx, group)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
+})
+
+router.put('/group', async (ctx, next) => {
+  const { group, newGroup } = ctx.request.body
+  await AuthController.updeateAuthGroup(ctx, group, newGroup)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 module.exports = router
