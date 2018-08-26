@@ -42,6 +42,15 @@ router.get('/', async (ctx, next) => {
  * 添加角色
  */
 router.post('/', async (ctx, next) => {
+  const { code, name, auths } = ctx.request.body
+  await RoleController.addRole(ctx, code, name, auths)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 /**

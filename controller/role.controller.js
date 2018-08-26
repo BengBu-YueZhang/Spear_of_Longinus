@@ -72,8 +72,39 @@ module.exports = {
 
   /**
    * 添加角色
+   * @param {String} code 角色代号
+   * @param {String} name 角色名
+   * @param {Array} auths 角色权限集
    */
-  addRole () {
+  addRole (ctx, code, name, auths = []) {
+    const validation = new Validation()
+    validation.add(code, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少角色code信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: 'code不能为空字符串'
+    }])
+    validation.add(name, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少角色name信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: 'name不能为空字符串'
+    }])
+    validation.add(auths, [{
+      strategy: 'isArray',
+      errMsg: 'auths必须为数组'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      const role = new Role({code, name, auths})
+      return await role.save().catch(() => {
+        throw new Error('保存失败')
+      })
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**

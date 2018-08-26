@@ -76,7 +76,7 @@ module.exports = {
    * @param {String} password 密码
    * @param {Array} role 角色集
    */
-  async addUser (ctx, name, password, role) {
+  async addUser (ctx, name, password, role = []) {
     let user = null
     const validation = new Validation()
     validation.add(name, [{
@@ -92,6 +92,10 @@ module.exports = {
     }, {
       strategy: 'isNotNullString',
       errMsg: '密码不能为空字符串'
+    }])
+    validation.add(role, [{
+      strategy: 'isArray',
+      errMsg: 'role必须为数组类型'
     }])
     const errMsg = validation.start()
     if (!errMsg) {

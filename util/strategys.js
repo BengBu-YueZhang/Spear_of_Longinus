@@ -24,6 +24,15 @@ const strategys = {
     if (R.identical(NaN, val) || val === Infinity || val === -Infinity || !R.is(Number, val)) {
       return errMsg
     }
+  },
+
+  /**
+   * 判断数组策略
+   */
+  isArray (val, errMsg) {
+    if (!R.is(Array, val)) {
+      return errMsg
+    }
   }
 }
 
