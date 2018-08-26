@@ -13,7 +13,7 @@ module.exports = {
    * 初始化角色权限系统
    * 将权限信息加载到redis中
    */
-  init () {
+  async init () {
   },
 
   /**
@@ -52,10 +52,10 @@ module.exports = {
     const validation = new Validation()
     validation.add(id, [{
       strategy: 'isNotEmpty',
-      errMsg: '缺少用户id信息'
+      errMsg: '缺少角色id信息'
     }, {
       strategy: 'isNotNullString',
-      errMsg: '缺少用户id信息'
+      errMsg: '缺少角色id信息'
     }])
     const errMsg = validation.start()
     if (!errMsg) {
@@ -77,7 +77,7 @@ module.exports = {
    * @param {String} name 角色名
    * @param {Array} auths 角色权限集
    */
-  addRole (ctx, code, name, auths = []) {
+  async addRole (ctx, code, name, auths = []) {
     const validation = new Validation()
     validation.add(code, [{
       strategy: 'isNotEmpty',
@@ -114,7 +114,7 @@ module.exports = {
    * @param {String} name 角色名
    * @param {Array} auths 角色权限集
    */
-  updateRole (ctx, id, name, auths = []) {
+  async updateRole (ctx, id, name, auths = []) {
     const validation = new Validation()
     validation.add(id, [{
       strategy: 'isNotEmpty',
@@ -155,7 +155,7 @@ module.exports = {
    * 删除角色信息, 因为用户表关联了角色信息，所以需要将用户表中对应的角色id同时删除了
    * @param {String} id 角色的ObjectId
    */
-  deleteRole (ctx, id) {
+  async deleteRole (ctx, id) {
     const validation = new Validation()
     validation.add(id, [{
       strategy: 'isNotEmpty',
