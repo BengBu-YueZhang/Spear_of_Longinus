@@ -18,10 +18,13 @@ const UserSchema = new Schema({
     required: true,
     min: 6
   },
-  // 角色集合(默认root用户)
+  // 角色集合
   role: {
-    type: [String],
-    default: ['root']
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Role'
+    }],
+    default: []
   },
   // 创建时间
   createDate: {
