@@ -4,6 +4,9 @@ const redisClient = require('../config/redis')
 const { promisify } = require('util')
 const getAsync = promisify(redisClient.get).bind(redisClient)
 
+/**
+ * 登录权限控制
+ */
 module.exports = function (ctx, next) {
   const token = ctx.headers['x-access-token']
   if (token) {
@@ -17,7 +20,8 @@ module.exports = function (ctx, next) {
         getAsync(id).then(res => {
           if (!res) return ctx.throw(403, 'token失效')
           ctx.decoded = decoded
-          next()
+          // 传递给接口权限进行控制
+          next(role)
         }).catch(err => {
           return ctx.throw(403, 'token失效')
         })

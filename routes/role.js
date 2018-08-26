@@ -10,9 +10,7 @@ const router = new Router({
  * @method GET
  */
 router.get('/list', async (ctx, next) => {
-  const { pagestart, pagesize } = ctx.request.query
-  pagestart = parseInt(pagestart, 10)
-  pagesize = parseInt(pagesize, 10)
+  let { pagestart, pagesize } = ctx.request.query
   const result = await RoleController.getRoles(ctx, pagestart, pagesize)
   ctx.result = {
     code: 200,
@@ -66,7 +64,7 @@ router.post('/', async (ctx, next) => {
  */
 router.put('/', async (ctx, next) => {
   const { id, name, auths } = ctx.request.body
-  await RoleController.updateRole(ctx, code, name, auths)
+  await RoleController.updateRole(ctx, id, name, auths)
   ctx.result = {
     code: 200,
     data: {

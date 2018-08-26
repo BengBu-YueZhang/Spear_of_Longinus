@@ -10,8 +10,6 @@ const router = new Router({
  */
 router.get('/list', async (ctx, next) => {
   const { pagestart, pagesize } = ctx.request.query
-  pagestart = parseInt(pagestart, 10)
-  pagesize = parseInt(pagesize, 10)
   const result = await AuthController.getAuths(ctx, pagestart, pagesize)
   ctx.result = {
     code: 200,

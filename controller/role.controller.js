@@ -22,6 +22,8 @@ module.exports = {
    * @param {Number} pagesize 
    */
   async getRoles (ctx, pagestart = 1, pagesize = 10) {
+    pagestart = parseInt(pagestart, 10)
+    pagesize = parseInt(pagesize, 10)
     const validation = new Validation()
     validation.add(pagestart, [{
       strategy: 'isNumber',
@@ -37,7 +39,7 @@ module.exports = {
         skip: pagestart,
         limit: pagesize
       }).catch(() => {
-        throw new Error('查询失败')
+        throw new Error('获取角色列表失败')
       })
     } else {
       ctx.throw(400, errMsg)
@@ -62,7 +64,7 @@ module.exports = {
       return await Role.findById({
         _id: id
       }, 'code name auths _id').populate({
-        path: 'auths'
+        path: 'auth'
       }).catch(() => {
         throw new Error('查询失败')
       })
@@ -175,7 +177,7 @@ module.exports = {
           roles: [id]
         }
       }).then(async () => {
-        return await Role.findByIdAndUpdate({
+        return await Role.findByIdAndRemove({
           _id: id
         })
       }).catch(() => {

@@ -87,8 +87,6 @@ router.delete('/', async (ctx, next) => {
  */
 router.get('/list', async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
-  pagestart = parseInt(pagestart, 10)
-  pagesize = parseInt(pagesize, 10)
   const result = await UserController.getUsers(ctx, pagestart, pagesize)
   ctx.result = {
     code: 200,
