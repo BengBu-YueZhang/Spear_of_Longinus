@@ -35,8 +35,8 @@ router.get('/', async (ctx, next) => {
  * @method POST
  */
 router.post('/', async (ctx, next) => {
-  let { name, password, role } = ctx.request.body
-  await UserController.addUser(ctx, name, password, role)
+  let { name, password, roles } = ctx.request.body
+  await UserController.addUser(ctx, name, password, roles)
   ctx.result = {
     code: 200,
     data: {

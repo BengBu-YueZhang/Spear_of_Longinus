@@ -56,7 +56,7 @@ module.exports = {
     if (!errMsg) {
       return await User.findOne(
         { _id: id },
-        'createDate name role'
+        'createDate name roles'
       ).populate({
         path: 'roles',
         populate: {
@@ -74,9 +74,9 @@ module.exports = {
    * 添加用户(用户注册)
    * @param {String} name 用户名
    * @param {String} password 密码
-   * @param {Array} role 角色集
+   * @param {Array} roles 角色集
    */
-  async addUser (ctx, name, password, role = []) {
+  async addUser (ctx, name, password, roles = []) {
     let user = null
     const validation = new Validation()
     validation.add(name, [{
@@ -93,9 +93,9 @@ module.exports = {
       strategy: 'isNotNullString',
       errMsg: '密码不能为空字符串'
     }])
-    validation.add(role, [{
+    validation.add(roles, [{
       strategy: 'isArray',
-      errMsg: 'role必须为数组类型'
+      errMsg: 'roles必须为数组类型'
     }])
     const errMsg = validation.start()
     if (!errMsg) {
@@ -103,7 +103,7 @@ module.exports = {
       if (user) throw new Error('用户名已被注册')
       // 密码加盐
       password = bcrypt.encrypt(password)
-      user = new User({name, password, role})
+      user = new User({name, password, roles})
       return await user.save().catch(() => {
         throw new Error('添加失败')
       })
@@ -199,7 +199,7 @@ module.exports = {
       const dynamicSecret = `${secret}${user.password}`
       const token = jwt.sign({
         id: user._id,
-        role: user.role
+        roles: user.roles
       }, dynamicSecret, { expiresIn: 60 * 60 * 24 })
       // redis中保存token信息
       const redisKey = user._id.toString()

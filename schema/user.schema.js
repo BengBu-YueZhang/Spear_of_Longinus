@@ -19,7 +19,7 @@ const UserSchema = new Schema({
     min: 6
   },
   // 角色集合
-  role: {
+  roles: {
     type: [{
       type: Schema.Types.ObjectId,
       ref: 'Role'
