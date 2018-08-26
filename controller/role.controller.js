@@ -3,6 +3,7 @@ const Role = require('../model/role.model')
 const redisClient = require('../config/redis')
 const { promisify } = require('util')
 const User = require('../model/user.model')
+const pagination = require('../util/pagination')
 const Acl = require('acl')
 const ACL_DB_INDEX = 2
 const selectAsync = promisify(redisClient.select).bind(redisClient)
@@ -35,9 +36,10 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
+      const { start, end } = pagination(pagestart, pagesize)
       return await Role.find(null, '_id name code', {
-        skip: pagestart,
-        limit: pagesize
+        skip: start,
+        limit: end
       }).catch(() => {
         throw new Error('获取角色列表失败')
       })

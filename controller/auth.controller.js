@@ -1,6 +1,7 @@
 const Validation = require('../util/Validation')
 const Auth = require('../model/auth.model')
 const Role = require('../model/role.model')
+const pagination = require('../util/pagination')
 
 module.exports = {
   /**
@@ -20,9 +21,10 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
+      const { start, end } = pagination(pagestart, pagesize)
       return await Auth.find(null, null, {
-        skip: pagestart,
-        limit: pagesize
+        skip: start,
+        limit: end
       }).catch(() => {
         throw new Error('获取权限列表失败')
       })
@@ -150,7 +152,9 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       Role.updateMany({
-        auths: [id]
+        auths: {
+          $all: [id]
+        }
       }, {
         $pullAll: {
           auths: [id]
@@ -176,12 +180,10 @@ module.exports = {
     return await Auth.aggregate([
       {
         $group: {
-          groupName: '$group'
+          _id: '$group'
         }
       }
-    ]).catch(() => {
-      throw new Error('获取权限组列表失败')
-    })
+    ])
   },
   
   /**
@@ -199,8 +201,10 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Role.deleteMany({
-        group: group
+      return await Auth.deleteMany({
+        group: {
+          $eq: group
+        }
       }).catch(() => {
         throw new Error('删除权限组失败')
       })

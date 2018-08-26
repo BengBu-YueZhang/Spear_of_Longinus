@@ -9,6 +9,7 @@ const selectAsync = promisify(redisClient.select).bind(redisClient)
 const Validation = require('../util/Validation')
 const jwt =require('jsonwebtoken')
 const USER_LOGIN_DB_INDEX = 1
+const pagination = require('../util/pagination')
 
 module.exports = {
   /**
@@ -30,9 +31,10 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
+      const { start, end } = pagination(pagestart, pagesize)
       return await User.find(null, '_id name createDate', {
-        skip: pagestart,
-        limit: pagesize
+        skip: start,
+        limit: end
       }).catch(() => {
         throw new Error('查询失败')
       })

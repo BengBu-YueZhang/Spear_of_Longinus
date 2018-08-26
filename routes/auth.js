@@ -7,6 +7,7 @@ const router = new Router({
 
 /**
  * 获取权限列表
+ * @api /auth/list
  */
 router.get('/list', async (ctx, next) => {
   const { pagestart, pagesize } = ctx.request.query
@@ -23,6 +24,8 @@ router.get('/list', async (ctx, next) => {
 
 /**
  * 获取权限
+ * @api /auth
+ * @method GET
  */
 router.get('/', async (ctx, next) => {
   const { id } = ctx.request.query
@@ -39,6 +42,8 @@ router.get('/', async (ctx, next) => {
 
 /**
  * 添加权限
+ * @api /auth
+ * @method POST
  */
 router.post('/', async (ctx, next) => {
   const { code, name, group } = ctx.request.body
@@ -54,6 +59,8 @@ router.post('/', async (ctx, next) => {
 
 /**
  * 更新权限
+ * @api /auth
+ * @method PUT
  */
 router.put('/', async (ctx, next) => {
   const { id, name, group } = ctx.request.body
@@ -70,6 +77,8 @@ router.put('/', async (ctx, next) => {
 /**
  * 删除权限
  * 需要将管理的角色权限一并删除
+ * @api /auth
+ * @method DELETE
  */
 router.delete('/', async (ctx, next) => {
   const { id } = ctx.request.query
@@ -83,6 +92,11 @@ router.delete('/', async (ctx, next) => {
   await next()
 })
 
+/**
+ * 获取全部的权限组
+ * @api /auth/group
+ * @method GET
+ */
 router.get('/group', async (ctx, next) => {
   const result = await AuthController.getAuthGroup()
   ctx.result = {
@@ -95,6 +109,11 @@ router.get('/group', async (ctx, next) => {
   await next()
 })
 
+/**
+ * 删除权限组
+ * @api /auth/group
+ * @method DELETE
+ */
 router.delete('/group', async (ctx, next) => {
   const { group } = ctx.request.query
   await AuthController.deleteAuthGroup(ctx, group)
@@ -107,6 +126,11 @@ router.delete('/group', async (ctx, next) => {
   await next()
 })
 
+/**
+ * 更新权限组的名称
+ * @api /auth/group
+ * @method PUT
+ */
 router.put('/group', async (ctx, next) => {
   const { group, newGroup } = ctx.request.body
   await AuthController.updeateAuthGroup(ctx, group, newGroup)
