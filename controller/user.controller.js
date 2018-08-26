@@ -4,6 +4,7 @@ const bcrypt = require('../config/bcrypt')
 const redisClient = require('../config/redis')
 const { promisify } = require('util')
 const setAsync = promisify(redisClient.set).bind(redisClient)
+const delAsync = promisify(redisClient.del).bind(redisClient)
 const selectAsync = promisify(redisClient.select).bind(redisClient)
 const Validation = require('../util/Validation')
 const USER_LOGIN_DB_INDEX = 1
@@ -182,7 +183,24 @@ module.exports = {
 
   /**
    * 用户登出
+   * @param {String} id 用户的ObjectId
    */
-  async logout () {
+  async logout (ctx, id) {
+    const validation = new Validation()
+    validation.add(id, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户id信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '缺少用户id信息'
+    }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      // 清除redis中保存的会话信息
+      await selectAsync(USER_LOGIN_DB_INDEX)
+      await delAsync(id)
+    } else {
+      ctx.throw(400, errMsg)
+    }
   }
 }

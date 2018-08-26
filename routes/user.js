@@ -112,6 +112,7 @@ router.post('/login', async (ctx) => {
       msg: 'success'
     }
   }
+  await next()
 })
 
 /**
@@ -120,6 +121,15 @@ router.post('/login', async (ctx) => {
  * @method GET
  */
 router.get('/logout', async (ctx) => {
+  let { id } = ctx.request.body
+  await UserController.logout(ctx, id)
+  ctx.result = {
+    code: 200,
+    data: {
+      msg: 'success'
+    }
+  }
+  await next()
 })
 
 module.exports = router
