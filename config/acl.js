@@ -4,8 +4,7 @@ const Acl = require('acl')
 const R = require('ramda')
 const redisClient = require('./redis')
 const Role = require('../model/role.model')
-
-let acl = new Acl(new Acl.redisBackend(redisClient))
+const acl = new Acl(new Acl.redisBackend(redisClient))
 
 module.exports = {
   /**
@@ -42,24 +41,20 @@ module.exports = {
       // 格式化权限数据
       let aclRoles = R.map((r) => {
         let allows = {}
-        let role = {
+        R.forEach(a => { allows[a.group] ? allows[a.group].push(a.code) : allows[a.group] = [a.code] }, r.auths)
+        let keys = R.keys(allows)
+        return {
           roles: [r.code],
-          allows: []
+          allows: R.map(k => {
+            return {
+              resources: k,
+              permissions: allows[k]
+            }
+          }, keys)
         }
-        for (let i = 0; i < r.auths.length; i++) {
-          if (!allows[r.auths[i].group]) {
-            allows[r.auths[i].group] = [r.auths[i].code]
-          }
-        }
-        for (let key in allows) {
-          role.allows.push({
-            resources: key,
-            permissions: allows[key]
-          })
-        }
-        return role
       }, roles)
       acl.allow(aclRoles)
+      console.log(JSON.stringify(aclRoles))
       console.log('权限模块加载完成')
     } catch (error) {
     }

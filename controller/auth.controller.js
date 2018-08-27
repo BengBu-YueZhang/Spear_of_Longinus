@@ -10,6 +10,7 @@ module.exports = {
   async getAuths (ctx, pagestart = 1, pagesize = 10) {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
+    const { start, end } = pagination(pagestart, pagesize)
     const validation = new Validation()
     validation.add(pagestart, [{
       strategy: 'isNumber',
@@ -21,7 +22,6 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const { start, end } = pagination(pagestart, pagesize)
       return await Auth.find(null, null, {
         skip: start,
         limit: end
@@ -62,7 +62,6 @@ module.exports = {
    */
   async addAuth (ctx, code, name, group) {
     const validation = new Validation()
-    const errMsg = validation.start()
     validation.add(code, [{
       strategy: 'isNotEmpty',
       errMsg: '缺少权限的code信息'
@@ -84,6 +83,7 @@ module.exports = {
       strategy: 'isNotNullString',
       errMsg: 'group信息不能为空字符串'
     }])
+    const errMsg = validation.start()
     if (!errMsg) {
       const auth = new Auth({code, name, group})
       return auth.save().catch(() => {

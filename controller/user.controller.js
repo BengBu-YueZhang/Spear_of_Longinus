@@ -1,5 +1,6 @@
 const User = require('../model/user.model')
 const secret = require('../config/jwt').secret
+const timeout = require('../config/jwt').timeout
 const bcrypt = require('../config/bcrypt')
 const redisClient = require('../config/redis')
 const { promisify } = require('util')
@@ -18,6 +19,7 @@ module.exports = {
   async getUsers (ctx, pagestart = 1, pagesize = 10) {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
+    const { start, end } = pagination(pagestart, pagesize)
     const validation = new Validation()
     validation.add(pagestart, [{
       strategy: 'isNumber',
@@ -29,7 +31,6 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const { start, end } = pagination(pagestart, pagesize)
       return await User.find(null, '_id name createDate', {
         skip: start,
         limit: end
@@ -107,7 +108,7 @@ module.exports = {
       password = bcrypt.encrypt(password)
       user = new User({name, password, roles})
       return await user.save().catch(() => {
-        throw new Error('添加失败')
+        throw new Error('添加用户失败')
       })
     } else {
       ctx.throw(400, errMsg)
@@ -122,6 +123,13 @@ module.exports = {
    */
   async updateUser (ctx, id, name) {
     const validation = new Validation()
+    validation.add(id, [{
+      strategy: 'isNotEmpty',
+      errMsg: '缺少用户id信息'
+    }, {
+      strategy: 'isNotNullString',
+      errMsg: '缺少用户id信息'
+    }])
     validation.add(name, [{
       strategy: 'isNotEmpty',
       errMsg: '缺少用户名'
@@ -138,7 +146,7 @@ module.exports = {
           name: name
         }
       }).catch(() => {
-        throw new Error('更新失败')
+        throw new Error('更新用户信息失败')
       }) 
     } else {
       ctx.throw(400, errMsg)
@@ -196,16 +204,17 @@ module.exports = {
       // 加盐的密码进行对比
       const equal = await bcrypt.compare(user.password, password)
       if (!equal) throw new Error('用户或密码错误')
-      // 动态jwt密钥, 使用secret(密钥)和password的组合, 可以避免在用户更改密码后, token仍然有效
-      // 用户重置密码后, 清楚在redis中登录信息，重新登录
+      // 动态jwt密钥, 使用secret(密钥)和password的组合, 可以避免在用户更改密码后, 之前的token仍然有效
+      // 用户重置密码后, 清除在redis中登录信息，重新登录
       const dynamicSecret = `${secret}${user.password}`
+      // 基于用户id和角色生成token
       const token = jwt.sign({
         id: user._id,
         roles: user.roles
-      }, dynamicSecret, { expiresIn: 60 * 60 * 24 })
+      }, dynamicSecret, { expiresIn: timeout })
       // redis中保存token信息
       const redisKey = user._id.toString()
-      await setAsync(redisKey, token, 'EX', 60 * 60 * 24)
+      await setAsync(redisKey, token, 'EX', timeout)
       // 返回token信息
       return Promise.resolve({ token })
     } else {

@@ -1,3 +1,4 @@
 module.exports = {
-  secret: 'secret'
+  secret: 'secret',
+  timeout: 60 * 60 * 24
 }

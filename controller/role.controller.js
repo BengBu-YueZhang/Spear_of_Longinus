@@ -12,6 +12,7 @@ module.exports = {
   async getRoles (ctx, pagestart = 1, pagesize = 10) {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
+    const { start, end } = pagination(pagestart, pagesize)
     const validation = new Validation()
     validation.add(pagestart, [{
       strategy: 'isNumber',
@@ -23,7 +24,6 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const { start, end } = pagination(pagestart, pagesize)
       return await Role.find(null, '_id name code', {
         skip: start,
         limit: end
