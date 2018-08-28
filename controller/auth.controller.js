@@ -151,21 +151,31 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      Role.updateMany({
-        auths: {
-          $all: [id]
-        }
-      }, {
-        $pullAll: {
-          auths: [id]
-        }
-      }).then(async () => {
-        return await Auth.findByIdAndRemove({
+      const session = await mongoose.startSession()
+      session.startTransaction()
+      try {
+        await Role.updateMany({
+          auths: {
+            $all: [id]
+          }
+        }, {
+          $pullAll: {
+            auths: [id]
+          }
+        })
+        await Auth.findByIdAndRemove({
           _id: id
         })
-      }).catch(() => {
+        // 事务结束
+        await session.commitTransaction()
+        session.endSession()
+        return Promise.resolve()
+      } catch (error) {
+        // 事务回滚
+        await session.abortTransaction()
+        session.endSession()
         throw new Error('删除权限失败')
-      })
+      }
     } else {
       ctx.throw(400, errMsg)
     }

@@ -2,6 +2,7 @@ const Validation = require('../util/Validation')
 const Role = require('../model/role.model')
 const User = require('../model/user.model')
 const pagination = require('../util/pagination')
+const mongoose = require('mongoose')
 
 module.exports = {
   /**
@@ -143,6 +144,8 @@ module.exports = {
   },
 
   /**
+   * TODO:
+   * MongoDB4.0支持事务
    * 删除角色信息, 因为用户表关联了角色信息，所以需要将用户表中对应的角色id同时删除了
    * @param {String} id 角色的ObjectId
    */
@@ -157,21 +160,32 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await User.updateMany({
-        roles: {
-          $all: [id]
-        }
-      }, {
-        $pullAll: {
-          roles: [id]
-        }
-      }).then(async () => {
-        return await Role.findByIdAndRemove({
+      // 事务开始
+      const session = await mongoose.startSession()
+      session.startTransaction()
+      try {
+        await User.updateMany({
+          roles: {
+            $all: [id]
+          }
+        }, {
+          $pullAll: {
+            roles: [id]
+          }
+        })
+        await Role.findByIdAndRemove({
           _id: id
         })
-      }).catch(() => {
-        throw new Error('删除失败')
-      })
+        // 事务结束
+        await session.commitTransaction()
+        session.endSession()
+        return Promise.resolve()
+      } catch (error) {
+        // 事务回滚
+        await session.abortTransaction()
+        session.endSession()
+        throw new Error('删除角色失败')
+      }
     } else {
       ctx.throw(400, errMsg)
     }
