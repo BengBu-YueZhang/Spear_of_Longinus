@@ -2,6 +2,7 @@ const Validation = require('../util/Validation')
 const Auth = require('../model/auth.model')
 const Role = require('../model/role.model')
 const pagination = require('../util/pagination')
+const mongoose = require('mongoose')
 
 module.exports = {
   /**
@@ -140,7 +141,7 @@ module.exports = {
   /**
    * 删除权限
    */
-  deleteAuth (ctx, id) {
+  async deleteAuth (ctx, id) {
     const validation = new Validation()
     validation.add(id, [{
       strategy: 'isNotEmpty',
