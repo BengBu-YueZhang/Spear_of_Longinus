@@ -13,22 +13,22 @@ module.exports = {
     pagesize = parseInt(pagesize, 10)
     const { start, end } = pagination(pagestart, pagesize)
     const validation = new Validation()
-    validation.add(pagestart, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
-    validation.add(pagesize, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
+    validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确, pagestart必须为数字' }])
+    validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确, pagesize必须为数字' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Auth.find(null, null, {
-        skip: start,
-        limit: end
-      }).catch(() => {
-        throw new Error('获取权限列表失败')
-      })
+      try {
+        return await Auth.find(
+          null,
+          null,
+          {
+            skip: start,
+            limit: end
+          }
+        )
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -39,20 +39,16 @@ module.exports = {
    */
   async getAuth (ctx, id) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少权限id信息'
-    }])
+    validation.add(id, [{strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Auth.findById({
-        _id: id
-      }).catch(() => {
-        throw new Error('获取权限详情失败')
-      })
+      try {
+        return await Auth.findById({
+          _id: id
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -63,33 +59,17 @@ module.exports = {
    */
   async addAuth (ctx, code, name, group) {
     const validation = new Validation()
-    validation.add(code, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的code信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'code信息不能为空字符串'
-    }])
-    validation.add(name, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的name信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'name信息不能为空字符串'
-    }])
-    validation.add(group, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的group信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'group信息不能为空字符串'
-    }])
+    validation.add(code, [{ strategy: 'isNotHave', errMsg: '缺少code参数' }])
+    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
+    validation.add(group, [{ strategy: 'isNotHave', errMsg: '缺少group参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const auth = new Auth({code, name, group})
-      return auth.save().catch(() => {
-        throw new Error('保存权限失败')
-      })
+      try {
+        const auth = new Auth({code, name, group})
+        await auth.save()
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -100,39 +80,23 @@ module.exports = {
    */
   async updateAuth (ctx, id, name, group) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少权限id信息'
-    }])
-    validation.add(name, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的name信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'name信息不能为空字符串'
-    }])
-    validation.add(group, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的group信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'group信息不能为空字符串'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
+    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
+    validation.add(group, [{ strategy: 'isNotHave', errMsg: '缺少group参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Auth.findByIdAndUpdate({
-        _id: id
-      }, {
-        $set: {
-          name: name,
-          group: group
-        }
-      }).catch(() => {
-        throw new Error('更新权限失败')
-      })
+      try {
+        await Auth.findByIdAndUpdate({
+          _id: id
+        }, {
+          $set: {
+            name: name,
+            group: group
+          }
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -143,13 +107,7 @@ module.exports = {
    */
   async deleteAuth (ctx, id) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少权限id信息'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
       const session = await mongoose.startSession()
@@ -167,14 +125,12 @@ module.exports = {
         await Auth.findByIdAndRemove({
           _id: id
         })
-        // 事务结束
         await session.commitTransaction()
         session.endSession()
       } catch (error) {
-        // 事务回滚
         await session.abortTransaction()
         session.endSession()
-        throw new Error('删除权限失败')
+        throw error
       }
     } else {
       ctx.throw(400, errMsg)
@@ -187,13 +143,17 @@ module.exports = {
    * 参考：https://docs.mongodb.com/manual/reference/command/distinct/#dbcmd.distinct
    */
   async getAuthGroup () {
-    return await Auth.aggregate([
-      {
-        $group: {
-          _id: '$group'
+    try {
+      return await Auth.aggregate([
+        {
+          $group: {
+            _id: '$group'
+          }
         }
-      }
-    ])
+      ])
+    } catch (error) {
+      throw error
+    }
   },
   
   /**
@@ -202,22 +162,18 @@ module.exports = {
    */
   async deleteAuthGroup (ctx, group) {
     const validation = new Validation()
-    validation.add(group, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的group信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'group信息不能为空字符串'
-    }])
+    validation.add(group, [{ strategy: 'isNotHave', errMsg: '缺少group参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Auth.deleteMany({
-        group: {
-          $eq: group
-        }
-      }).catch(() => {
-        throw new Error('删除权限组失败')
-      })
+      try {
+        await Auth.deleteMany({
+          group: {
+            $eq: group
+          }
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -229,31 +185,21 @@ module.exports = {
    */
   async updeateAuthGroup (ctx, group, newGroup) {
     const validation = new Validation()
-    validation.add(group, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的group信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'group信息不能为空字符串'
-    }])
-    validation.add(newGroup, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少权限的newGroup信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'newGroup信息不能为空字符串'
-    }])
+    validation.add(group, [{ strategy: 'isNotHave', errMsg: '缺少group参数' }])
+    validation.add(newGroup, [{ strategy: 'isNotHave', errMsg: '缺少权限的newGroup信息' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return Auth.updateMany({
-        group: group
-      }, {
-        $set: {
-          group: newGroup
-        }
-      }).catch(() => {
-        throw new Error('更新权限组失败')
-      })
+      try {
+        await Auth.updateMany({
+          group: group
+        }, {
+          $set: {
+            group: newGroup
+          }
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }

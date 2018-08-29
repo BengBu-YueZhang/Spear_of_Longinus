@@ -23,7 +23,7 @@ router.get('/list', async (ctx, next) => {
 })
 
 /**
- * 获取权限
+ * 获取权限详情
  * @api /auth
  * @method GET
  */
