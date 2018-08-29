@@ -218,7 +218,7 @@ module.exports = {
   /**
    * 增加一条浏览量
    */
-  async addPageviews (postId) {
+  async addPageviews (ctx, postId) {
     const validation = new Validation()
     validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     const errMsg = validation.start()
@@ -242,8 +242,9 @@ module.exports = {
 
   /**
    * 设置帖子是否置顶
+   * TODO: 列表查询语句需要更改
    */
-  async setTopping (postId, topping) {
+  async setTopping (ctx, postId, topping) {
     const validation = new Validation()
     validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     validation.add(topping, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
@@ -269,7 +270,7 @@ module.exports = {
   /**
    * 设置帖子是否加精
    */
-  async setEssence (postId, essence) {
+  async setEssence (ctx, postId, essence) {
     const validation = new Validation()
     validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     validation.add(essence, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])

@@ -12,6 +12,8 @@ const app = new Koa()
 const UserRouter = require('./routes/user')
 const RoleRouter = require('./routes/role')
 const AuthRouter = require('./routes/auth')
+const PostRouter = require('./routes/post')
+const ReplyRouter = require('./routes/reply')
 
 mongo.connect()
 app.use(cors({
@@ -36,6 +38,8 @@ app.use(result())
 app.use(UserRouter.routes(), UserRouter.allowedMethods())
 app.use(RoleRouter.routes(), RoleRouter.allowedMethods())
 app.use(AuthRouter.routes(), AuthRouter.allowedMethods())
+app.use(PostRouter.routes(), PostRouter.allowedMethods())
+app.use(ReplyRouter.routes(), ReplyRouter.allowedMethods())
 
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
