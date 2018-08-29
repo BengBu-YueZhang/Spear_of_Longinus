@@ -170,7 +170,6 @@ module.exports = {
         // 事务结束
         await session.commitTransaction()
         session.endSession()
-        return Promise.resolve()
       } catch (error) {
         // 事务回滚
         await session.abortTransaction()

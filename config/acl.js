@@ -28,6 +28,19 @@ module.exports = {
   acl,
 
   /**
+   * 判断是否有权限
+   */
+  async isAuth (role, model, auth) {
+    return acl.areAnyRolesAllowed(role, model, auth, function (err, result) {
+      if (result) {
+        return true
+      } else {
+        return false
+      }
+    })
+  },
+
+  /**
    * 初始化权限
    */
   async initRole () {
@@ -54,7 +67,6 @@ module.exports = {
         }
       }, roles)
       acl.allow(aclRoles)
-      console.log(JSON.stringify(aclRoles))
       console.log('权限模块加载完成')
     } catch (error) {
     }
