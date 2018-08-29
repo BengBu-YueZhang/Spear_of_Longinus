@@ -13,6 +13,7 @@ module.exports = {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
     const { start, end } = pagination(pagestart, pagesize)
+    const validation = new Validation()
     validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     const errMsg = validation.start()
@@ -79,14 +80,14 @@ module.exports = {
   /**
    * 添加一条主题帖子
    */
-  async addPost (ctx, id, title, detail) {
+  async addPost (ctx, title, detail) {
     const validation = new Validation()
-    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     validation.add(title, [{ strategy: 'isNotHave', errMsg: '缺失title参数' }])
     validation.add(detail, [{ strategy: 'isNotHave', errMsg: '缺少detail信息' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
+        const { id } = ctx.decoded
         const post = new Post({
           createdBy: id,
           title,
@@ -107,7 +108,7 @@ module.exports = {
    * 1. 普通权限, 只能删除自己发出的帖子(如果是主题贴其他人回复的帖子也会被删除)
    * c. 管理员可以删除任意人的帖子
    */
-  async deletePost (ctx, postId) {
+  async deletePost (ctx, postId, createdBy) {
     const validation = new Validation()
     validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺失postId参数' }])
     const errMsg = validation.start()
@@ -115,19 +116,16 @@ module.exports = {
       try {
         const { roles, id } = ctx.decoded
         if (!isAuth(roles, 'post', 'delete_other')) {
-          const post = await Post.findById({ _id: postId })
-          if (post.createdBy !== id) {
+          if (createdBy !== id) {
             throw new Error('只能删除自己发布的帖子')
           }
         }
         const session = await mongoose.startSession()
         session.startTransaction()
-        await Post.findByIdAndRemove({
-          _id: postId
-        })
+        await Post.findByIdAndRemove(postId)
         await Reply.deleteMany({
-          postId: {
-            $eq: postId
+          $eq: {
+            postId: postId
           }
         })
         await session.commitTransaction()
