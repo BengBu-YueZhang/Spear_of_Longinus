@@ -122,3 +122,5 @@ router.post('/essence', async (ctx, next) => {
   }
   await next()
 })
+
+module.exports = router

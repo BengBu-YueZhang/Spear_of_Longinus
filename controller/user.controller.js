@@ -8,7 +8,6 @@ const setAsync = promisify(redisClient.set).bind(redisClient)
 const delAsync = promisify(redisClient.del).bind(redisClient)
 const Validation = require('../util/Validation')
 const jwt =require('jsonwebtoken')
-const pagination = require('../util/pagination')
 
 module.exports = {
   /**
@@ -19,7 +18,7 @@ module.exports = {
   async getUsers (ctx, pagestart = 1, pagesize = 10) {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
-    const { start, end } = pagination(pagestart, pagesize)
+    skips = pagesize * (pagestart - 1)
     const validation = new Validation()
     validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
@@ -27,8 +26,8 @@ module.exports = {
     if (!errMsg) {
       try {
         return await User.find(null, '_id name createDate', {
-          skip: start,
-          limit: end
+          skip: skips,
+          limit: pagesize
         })
       } catch (error) {
         throw error

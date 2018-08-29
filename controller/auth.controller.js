@@ -1,7 +1,6 @@
 const Validation = require('../util/Validation')
 const Auth = require('../model/auth.model')
 const Role = require('../model/role.model')
-const pagination = require('../util/pagination')
 const mongoose = require('mongoose')
 
 module.exports = {
@@ -11,21 +10,26 @@ module.exports = {
   async getAuths (ctx, pagestart = 1, pagesize = 10) {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
-    const { start, end } = pagination(pagestart, pagesize)
+    skips = pagesize * (pagestart - 1)
     const validation = new Validation()
     validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确, pagestart必须为数字' }])
     validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确, pagesize必须为数字' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
-        return await Auth.find(
+        const list = await Auth.find(
           null,
           null,
           {
-            skip: start,
-            limit: end
+            skip: skips,
+            limit: pagesize
           }
         )
+        const count = await Auth.find().count()
+        return {
+          list,
+          count
+        }
       } catch (error) {
         throw error
       }

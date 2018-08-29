@@ -1,5 +1,4 @@
 const Validation = require('../util/Validation')
-const pagination = require('../util/pagination')
 const Post = require('../model/post.model')
 const Reply = require('../model/reply.model')
 const mongoose = require('mongoose')
@@ -12,7 +11,7 @@ module.exports = {
   async getPosts (ctx, pagestart = 1, pagesize = 10) {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
-    const { start, end } = pagination(pagestart, pagesize)
+    skips = pagesize * (pagestart - 1)
     const validation = new Validation()
     validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
@@ -23,8 +22,8 @@ module.exports = {
           null,
           null,
           {
-            skip: start,
-            limit: end
+            skip: skips,
+            limit: pagesize
           }
         ).populate({
           path: 'users'
@@ -45,7 +44,7 @@ module.exports = {
   async getPostDetail (ctx, postId, pagestart = 1, pagesize = 10) {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
-    const { start, end } = pagination(pagestart, pagesize)
+    skips = pagesize * (pagestart - 1)
     const validation = new Validation()
     validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
@@ -63,8 +62,8 @@ module.exports = {
         const replys = await Reply.find({
           _id: postId          
         }, 'detail createdAt createdBy', {
-          skip: start,
-          limit: end
+          skip: skips,
+          limit: pagesize
         }).populate({
           path: 'users'
         })

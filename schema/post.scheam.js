@@ -50,5 +50,10 @@ const PostSchema = new Schema({
     type: Number,
     default: 0,
     enum: [0, 1]
+  },
+  // 帖子的类型
+  type: {
+    type: String,
+    default: 'normal'
   }
 })

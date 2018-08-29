@@ -1,14 +1,14 @@
 const Relpy = require('../model/reply.model')
 const PostController = require('../controller/post.controller')
-const mongoose = require('mongoose')
 const isAuth = require('../config/acl').isAuth
 const Validation = require('../util/Validation')
+const mongoose = require('mongoose')
 
 module.exports = {
   /**
    * 添加一条回复
    */
-  addReply (ctx, postId, detail) {
+  async addReply (ctx, postId, detail) {
     const validation = new Validation()
     validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     validation.add(detail, [{ strategy: 'isNotHave', errMsg: '缺少detail参数' }])
@@ -41,7 +41,7 @@ module.exports = {
   /**
    * 删除一条回复
    */
-  deleteReply (ctx, id, createdBy) {
+  async deleteReply (ctx, id, createdBy) {
     const validation = new Validation()
     validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()

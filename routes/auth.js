@@ -7,6 +7,7 @@ const router = new Router({
 /**
  * 获取权限列表
  * @api /auth/list
+ * TODO: 测试完成
  */
 router.get('/list', async (ctx, next) => {
   const { pagestart, pagesize } = ctx.request.query
@@ -14,7 +15,7 @@ router.get('/list', async (ctx, next) => {
   ctx.result = {
     code: 200,
     data: {
-      list: result,
+      ...result,
       msg: 'success'
     }
   }
@@ -25,6 +26,7 @@ router.get('/list', async (ctx, next) => {
  * 获取权限详情
  * @api /auth
  * @method GET
+ * TODO: 测试完成
  */
 router.get('/', async (ctx, next) => {
   const { id } = ctx.request.query
@@ -43,6 +45,7 @@ router.get('/', async (ctx, next) => {
  * 添加权限
  * @api /auth
  * @method POST
+ * TODO: 测试完成
  */
 router.post('/', async (ctx, next) => {
   const { code, name, group } = ctx.request.body
