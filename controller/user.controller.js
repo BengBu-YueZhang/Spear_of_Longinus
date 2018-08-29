@@ -7,7 +7,7 @@ const { promisify } = require('util')
 const setAsync = promisify(redisClient.set).bind(redisClient)
 const delAsync = promisify(redisClient.del).bind(redisClient)
 const Validation = require('../util/Validation')
-const jwt =require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 module.exports = {
   /**
