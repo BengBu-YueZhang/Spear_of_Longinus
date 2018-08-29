@@ -20,7 +20,7 @@ module.exports = function (model, auth) {
         } else {
           // 使用redis进行登录的验证, 避免没有登录的时候, 使用之前的token进行访问
           // 从token中获取id信息以及角色信息
-          const { id, role } = decoded
+          const { id, roles } = decoded
           getAsync(id).then(res => {
             if (!res) return ctx.throw(403, 'token失效')
             ctx.decoded = decoded
@@ -28,7 +28,7 @@ module.exports = function (model, auth) {
               next()
             } else {
               // 接口权限验证
-              acl.areAnyRolesAllowed(role, model, auth, function (err, result) {
+              acl.areAnyRolesAllowed(roles, model, auth, function (err, result) {
                 if (result) {
                   next()
                 } else {

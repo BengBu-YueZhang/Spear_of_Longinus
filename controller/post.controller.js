@@ -147,9 +147,9 @@ module.exports = {
     }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const { role } = ctx.decoded
+      const { roles } = ctx.decoded
       // 判断是否有删除其他的帖子的权限，如果没有则需要判断帖子是否属于自己的, 才能删除
-      if (!isAuth(role, 'post', 'delete_other')) {
+      if (!isAuth(roles, 'post', 'delete_other')) {
         const post = await Post.findById({ _id: postId })
         if (post.createdBy !== uid) {
           throw new Error('只能删除自己发布的帖子')

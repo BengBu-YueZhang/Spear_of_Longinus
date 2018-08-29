@@ -21,22 +21,18 @@ module.exports = {
     pagesize = parseInt(pagesize, 10)
     const { start, end } = pagination(pagestart, pagesize)
     const validation = new Validation()
-    validation.add(pagestart, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
-    validation.add(pagesize, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
+    validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
+    validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await User.find(null, '_id name createDate', {
-        skip: start,
-        limit: end
-      }).catch(() => {
-        throw new Error('查询失败')
-      })
+      try {
+        return await User.find(null, '_id name createDate', {
+          skip: start,
+          limit: end
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -48,26 +44,24 @@ module.exports = {
    */
   async getUser (ctx, id) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少用户id信息'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await User.findOne(
-        { _id: id },
-        'createDate name roles'
-      ).populate({
-        path: 'roles',
-        populate: {
-          path: 'auths'
-        }
-      }).catch(() => {
-        ctx.throw(400, 'id不存在')
-      })
+      try {
+        return await User.findById(
+          {
+            _id: id
+          },
+          'createDate name roles'
+        ).populate({
+          path: 'roles',
+          populate: {
+            path: 'auths'
+          }
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -80,36 +74,21 @@ module.exports = {
    * @param {Array} roles 角色集
    */
   async addUser (ctx, name, password, roles = []) {
-    let user = null
     const validation = new Validation()
-    validation.add(name, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户名'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '用户名不能为空字符串'
-    }])
-    validation.add(password, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少密码'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '密码不能为空字符串'
-    }])
-    validation.add(roles, [{
-      strategy: 'isArray',
-      errMsg: 'roles必须为数组类型'
-    }])
+    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
+    validation.add(password, [{ strategy: 'isNotHave', errMsg: '缺少password参数' }])
+    validation.add(roles, [{ strategy: 'isArray', errMsg: '参数类型不正确, roles必须为数组类型' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      user = await User.findOne({ name })
-      if (user) throw new Error('用户名已被注册')
-      // 密码加盐
-      password = bcrypt.encrypt(password)
-      user = new User({name, password, roles})
-      return await user.save().catch(() => {
-        throw new Error('添加用户失败')
-      })
+      try {
+        let user = await User.findOne({ name })
+        if (user) throw new Error('用户名已被注册')
+        password = bcrypt.encrypt(password)
+        user = new User({name, password, roles})
+        await user.save()
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -123,31 +102,21 @@ module.exports = {
    */
   async updateUser (ctx, id, name) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少用户id信息'
-    }])
-    validation.add(name, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户名'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '用户名不能为空字符串'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
+    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await User.findByIdAndUpdate({
-        _id: id
-      }, {
-        $set: {
-          name: name
-        }
-      }).catch(() => {
-        throw new Error('更新用户信息失败')
-      }) 
+      try {
+        await User.findByIdAndUpdate({
+          _id: id
+        }, {
+          $set: {
+            name: name
+          }
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -162,21 +131,16 @@ module.exports = {
     // 参考: https://stackoverflow.com/questions/30417389/the-findoneandremove-and-findoneandupdate-dont-work-as-intended
     // 使用findByIdAndRemove
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少用户id信息'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return User.findByIdAndRemove({
-        _id: id
-      }).catch((err) => {
-        console.log(err)
-        throw new Error('删除失败')
-      })
+      try {
+        await User.findByIdAndRemove({
+          _id: id
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -189,34 +153,23 @@ module.exports = {
    */
   async login (ctx, name, password) {
     const validation = new Validation()
-    validation.add(name, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少name信息'
-    }])
-    validation.add(password, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少password信息'
-    }])
+    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
+    validation.add(password, [{ strategy: 'isNotHave', errMsg: '缺少password信息' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const user = await User.findOne({ name })
-      if (!user) throw new Error('用户不存在')
-      // 加盐的密码进行对比
-      const equal = await bcrypt.compare(user.password, password)
-      if (!equal) throw new Error('用户或密码错误')
-      // 动态jwt密钥, 使用secret(密钥)和password的组合, 可以避免在用户更改密码后, 之前的token仍然有效
-      // 用户重置密码后, 清除在redis中登录信息，重新登录
-      const dynamicSecret = `${secret}${user.password}`
-      // 基于用户id和角色生成token
-      const token = jwt.sign({
-        id: user._id,
-        roles: user.roles
-      }, dynamicSecret, { expiresIn: timeout })
-      // redis中保存token信息
-      const redisKey = user._id.toString()
-      await setAsync(redisKey, token, 'EX', timeout)
-      // 返回token信息
-      return Promise.resolve({ token })
+      try {
+        const user = await User.findOne({ name })
+        if (!user) throw new Error('用户不存在')
+        const equal = await bcrypt.compare(user.password, password)
+        if (!equal) throw new Error('用户或密码错误')
+        const dynamicSecret = `${secret}${user.password}`
+        const token = jwt.sign({ id: user._id, roles: user.roles }, dynamicSecret, { expiresIn: timeout })
+        const redisKey = user._id.toString()
+        await setAsync(redisKey, token, 'EX', timeout)
+        return Promise.resolve({ token })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -228,16 +181,9 @@ module.exports = {
    */
   async logout (ctx, id) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少用户id信息'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      // 清除redis中保存的会话信息
       await delAsync(id)
     } else {
       ctx.throw(400, errMsg)
