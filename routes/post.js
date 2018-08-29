@@ -1,6 +1,7 @@
 const Router = require('koa-router')
 const router = new Router({ prefix: '/post' })
 const PostController = require('../controller/post.controller')
+const isAuth = require('../middleware/isAuth')
 
 /**
  * 帖子列表
@@ -43,7 +44,7 @@ router.get('/', async (ctx, next) => {
  * @api /post
  * @method POST
  */
-router.post('/', async (ctx, next) => {
+router.post('/', isAuth(), async (ctx, next) => {
   const { title, detail } = ctx.request.body
   await PostController.addPost(ctx, title, detail)
   ctx.result = {

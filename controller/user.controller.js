@@ -25,10 +25,15 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       try {
-        return await User.find(null, '_id name createDate', {
+        const list = await User.find(null, '_id name createDate', {
           skip: skips,
           limit: pagesize
         })
+        const count = await User.find(null).count()
+        return {
+          list,
+          count
+        }
       } catch (error) {
         throw error
       }
@@ -165,7 +170,7 @@ module.exports = {
         const token = jwt.sign({ id: user._id, roles: user.roles }, dynamicSecret, { expiresIn: timeout })
         const redisKey = user._id.toString()
         await setAsync(redisKey, token, 'EX', timeout)
-        return Promise.resolve({ token })
+        return token
       } catch (error) {
         throw error
       }

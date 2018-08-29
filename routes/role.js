@@ -8,6 +8,7 @@ const router = new Router({
  * 获取角色列表
  * @api /role/list
  * @method GET
+ * TODO: 测试完成
  */
 router.get('/list', async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
@@ -26,6 +27,7 @@ router.get('/list', async (ctx, next) => {
  * 获取单个角色信息
  * @api /role
  * @method GET
+ * TODO: 测试完成
  */
 router.get('/', async (ctx, next) => {
   const { id } = ctx.request.query
@@ -44,6 +46,7 @@ router.get('/', async (ctx, next) => {
  * 添加角色
  * @api /role
  * @method POST
+ * TODO: 测试完成
  */
 router.post('/', async (ctx, next) => {
   const { code, name, auths } = ctx.request.body
@@ -61,6 +64,7 @@ router.post('/', async (ctx, next) => {
  * 更新角色
  * @api /role
  * @method PUT
+ * TODO: 测试完成
  */
 router.put('/', async (ctx, next) => {
   const { id, name, auths } = ctx.request.body
@@ -78,6 +82,7 @@ router.put('/', async (ctx, next) => {
  * 删除角色
  * @api /role
  * @method DELETE
+ * TODO: 测试完成
  */
 router.delete('/', async (ctx, next) => {
   const { id, } = ctx.request.query

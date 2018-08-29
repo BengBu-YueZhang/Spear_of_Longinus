@@ -19,7 +19,7 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       try {
-        return await Role.find(
+        const list = await Role.find(
           null,
           '_id name code',
           {
@@ -27,6 +27,11 @@ module.exports = {
             limit: pagesize
           }
         )
+        const count = await Role.find().count()
+        return {
+          list,
+          count
+        }
       } catch (error) {
         throw error
       }
