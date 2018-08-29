@@ -18,7 +18,7 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       try {
-        return await Post.find(
+        const list = await Post.find(
           null,
           null,
           {
@@ -30,6 +30,11 @@ module.exports = {
         }).populate({
           path: 'replys'
         })
+        const count = await Post.count()
+        return {
+          list,
+          count
+        }
       } catch (error) {
         throw error
       }

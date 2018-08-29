@@ -12,7 +12,8 @@ const acl = require('./../config/acl').acl
  */
 module.exports = function (model, auth) {
   return async function (ctx, next) {
-    const token = ctx.headers['x-access-token']
+    // const token = ctx.headers['x-access-token']
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjViODEzODAyZTgwNDhkMGRkNmE1MjE3MiIsInJvbGVzIjpbXSwiaWF0IjoxNTM1NTQyMjA2LCJleHAiOjE1MzU2Mjg2MDZ9.PmTc2lyE5OVUTTPPcMxXKLfoHGWHcAWga9NoifK4F9w'
     if (token) {
       jwt.verify(token, secret, function (err, decoded) {
         if (err) {
@@ -21,7 +22,7 @@ module.exports = function (model, auth) {
           // 使用redis进行登录的验证, 避免没有登录的时候, 使用之前的token进行访问
           // 从token中获取id信息以及角色信息
           const { id, roles } = decoded
-          getAsync(id).then(res => {
+          getAsync(id).then(async (res) => {
             if (!res) return ctx.throw(403, 'token失效')
             ctx.decoded = decoded
             if (!model || !auth) {

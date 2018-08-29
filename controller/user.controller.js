@@ -166,8 +166,7 @@ module.exports = {
         if (!user) throw new Error('用户不存在')
         const equal = await bcrypt.compare(user.password, password)
         if (!equal) throw new Error('用户或密码错误')
-        const dynamicSecret = `${secret}${user.password}`
-        const token = jwt.sign({ id: user._id, roles: user.roles }, dynamicSecret, { expiresIn: timeout })
+        const token = jwt.sign({ id: user._id, roles: user.roles }, secret, { expiresIn: timeout })
         const redisKey = user._id.toString()
         await setAsync(redisKey, token, 'EX', timeout)
         return token

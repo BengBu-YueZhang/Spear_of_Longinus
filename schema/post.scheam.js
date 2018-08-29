@@ -57,3 +57,5 @@ const PostSchema = new Schema({
     default: 'normal'
   }
 })
+
+module.exports = PostSchema
