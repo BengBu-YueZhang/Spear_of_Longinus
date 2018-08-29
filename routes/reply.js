@@ -6,6 +6,8 @@ const ReplyController = require('../controller/reply.controller')
 
 /**
  * 添加一条回复
+ * @api /reply
+ * @method POST
  */
 router.post('/', async (ctx, next) => {
   const { postId, detail } = ctx.request.body
@@ -21,6 +23,8 @@ router.post('/', async (ctx, next) => {
 
 /**
  * 删除一条回复
+ * @api /reply
+ * @method DELETE
  */
 router.delete('/', async (ctx, next) => {
   const { id, createdBy } = ctx.request.query
