@@ -13,26 +13,26 @@ module.exports = {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
     const { start, end } = pagination(pagestart, pagesize)
-    validation.add(pagestart, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
-    validation.add(pagesize, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
+    validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
+    validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Post.find(null, null, {
-        skip: start,
-        limit: end
-      }).populate({
-        path: 'users'
-      }).populate({
-        path: 'replys'
-      }).catch(() => {
-        throw new Error('获取帖子列表失败')
-      })
+      try {
+        return await Post.find(
+          null,
+          null,
+          {
+            skip: start,
+            limit: end
+          }
+        ).populate({
+          path: 'users'
+        }).populate({
+          path: 'replys'
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -46,21 +46,9 @@ module.exports = {
     pagesize = parseInt(pagesize, 10)
     const { start, end } = pagination(pagestart, pagesize)
     const validation = new Validation()
-    validation.add(postId, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少帖子id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少帖子id信息'
-    }])
-    validation.add(pagestart, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
-    validation.add(pagesize, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
+    validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
+    validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
@@ -93,77 +81,50 @@ module.exports = {
    */
   async addPost (ctx, id, title, detail) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少主题帖id'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少主题帖id'
-    }])
-    validation.add(title, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺失title信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'title不能为空字符串'
-    }])
-    validation.add(detail, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少detail信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'detail不能为空字符串'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
+    validation.add(title, [{ strategy: 'isNotHave', errMsg: '缺失title参数' }])
+    validation.add(detail, [{ strategy: 'isNotHave', errMsg: '缺少detail信息' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const post = new Post({
-        createdBy: id,
-        title,
-        detail
-      })
-      await post.save().catch(() => {
-        throw new Error('帖子发布失败')
-      })
+      try {
+        const post = new Post({
+          createdBy: id,
+          title,
+          detail
+        })
+        await post.save()
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
   },
 
   /**
-   * 删除帖子
+   * 删除主题贴
    * @param {String} postId 帖子的id
-   * a. 只能删除自己发出的帖子
-   * b. 删除主题帖，回复的帖子也会被删除
-   * c. 管理员可以删除任意的帖子
+   * 1. 普通权限, 只能删除自己发出的帖子(如果是主题贴其他人回复的帖子也会被删除)
+   * c. 管理员可以删除任意人的帖子
    */
   async deletePost (ctx, postId) {
     const validation = new Validation()
-    validation.add(postId, [{
-      strategy: 'isNotEmpty',
-      errMsg: '参数不全'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '参数不全'
-    }])
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺失postId参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const { roles } = ctx.decoded
-      // 判断是否有删除其他的帖子的权限，如果没有则需要判断帖子是否属于自己的, 才能删除
-      if (!isAuth(roles, 'post', 'delete_other')) {
-        const post = await Post.findById({ _id: postId })
-        if (post.createdBy !== uid) {
-          throw new Error('只能删除自己发布的帖子')
-        }
-      }
-      // 删除帖子
-      const session = await mongoose.startSession()
-      session.startTransaction()
       try {
-        // 删除Post表中对应的帖子
+        const { roles, id } = ctx.decoded
+        if (!isAuth(roles, 'post', 'delete_other')) {
+          const post = await Post.findById({ _id: postId })
+          if (post.createdBy !== id) {
+            throw new Error('只能删除自己发布的帖子')
+          }
+        }
+        const session = await mongoose.startSession()
+        session.startTransaction()
         await Post.findByIdAndRemove({
           _id: postId
         })
-        // 删除Reply回复的帖子
         await Reply.deleteMany({
           postId: {
             $eq: postId
@@ -187,15 +148,29 @@ module.exports = {
    */
   async addReply (ctx, replyId, postId) {
     const validation = new Validation()
-    validation.add(replyId, [{
-      strategy: 'isNotEmpty',
-      errMsg: '参数不全'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '参数不全'
-    }])
+    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少replyId参数' }])
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
+      try {
+        await Post.updateMany(
+          {
+            $eq: {
+              _id: postId
+            }
+          },
+          {
+            $inc: {
+              replyLength: 1
+            },
+            $set: {
+              lastReply: replyId
+            }
+          }
+        )
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -205,24 +180,121 @@ module.exports = {
    * post删除一条回复
    * 需要更新回复的总数，最后的回复帖子的字段
    */
-  async deleteReply (ctx) {
+  async deleteReply (ctx, postId) {
+    const validation = new Validation()
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      try {
+        const result = await Reply.findOne(
+          {
+            $eq: {
+              postId: postId
+            }
+          },
+          '_id'
+        ).sort({
+          createdAt: -1
+        })
+        console.log(result)
+        await Post.updateOne(
+          {
+            $eq: {
+              _id: postId
+            }
+          },
+          {
+            $inc: {
+              replyLength: -1
+            }
+          }
+        )
+      } catch (error) {
+        throw error
+      }
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**
    * 增加一条浏览量
    */
-  async addPageviews () {
+  async addPageviews (postId) {
+    const validation = new Validation()
+    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      try {
+        await Post.findByIdAndUpdate(
+          postId,
+          {
+            $inc: {
+              pageviews: 1
+            }
+          }
+        )
+      } catch (error) {
+        throw error
+      }
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**
    * 设置帖子是否置顶
    */
-  async setTopping () {
+  async setTopping (postId, topping) {
+    const validation = new Validation()
+    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    validation.add(topping, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      try {
+        await Post.findByIdAndUpdate(
+          postId,
+          {
+            $set: {
+              topping: topping
+            }
+          }
+        )
+      } catch (error) {
+        throw error
+      }
+    } else {
+      ctx.throw(400, errMsg)
+    }
   },
 
   /**
    * 设置帖子是否加精
    */
-  async setEssence () {
+  async setEssence (postId, essence) {
+    const validation = new Validation()
+    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    validation.add(essence, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
+    const errMsg = validation.start()
+    if (!errMsg) {
+      try {
+        await Post.updateOne(
+          {
+            $eq: {
+              _id: postId
+            }
+          },
+          {
+            $set: {
+              essence: essence
+            }
+          }
+        )
+      } catch (error) {
+        throw error
+      }
+    } else {
+      ctx.throw(400, errMsg)
+    }
   }
 }

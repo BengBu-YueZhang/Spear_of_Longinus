@@ -42,11 +42,13 @@ const PostSchema = new Schema({
   // 是否置顶
   topping: {
     type: Number,
-    default: 0
+    default: 0,
+    enum: [0, 1]
   },
   // 是否精华
   essence: {
     type: Number,
-    default: 0
+    default: 0,
+    enum: [0, 1]
   }
 })
