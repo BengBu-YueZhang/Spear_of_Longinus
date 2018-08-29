@@ -15,49 +15,48 @@ module.exports = {
     pagesize = parseInt(pagesize, 10)
     const { start, end } = pagination(pagestart, pagesize)
     const validation = new Validation()
-    validation.add(pagestart, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
-    validation.add(pagesize, [{
-      strategy: 'isNumber',
-      errMsg: '参数类型不正确'
-    }])
+    validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
+    validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Role.find(null, '_id name code', {
-        skip: start,
-        limit: end
-      }).catch(() => {
-        throw new Error('获取角色列表失败')
-      })
+      try {
+        return await Role.find(
+          null,
+          '_id name code',
+          {
+            skip: start,
+            limit: end
+          }
+        )
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
   },
 
   /**
-   * 获取单个角色的详情信息
+   * 获取角色的详情信息
    * @param {String} id 角色的ObjectId
    */
   async getRole (ctx, id) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少角色id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少角色id信息'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Role.findById({
-        _id: id
-      }, 'code name auths _id').populate({
-        path: 'auths'
-      }).catch(() => {
-        throw new Error('查询失败')
-      })
+      try {
+        return await Role.findById(
+          {
+            _id: id
+          },
+          'code name auths _id'
+        ).populate({
+          path: 'auths'
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -71,30 +70,17 @@ module.exports = {
    */
   async addRole (ctx, code, name, auths = []) {
     const validation = new Validation()
-    validation.add(code, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少角色code信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'code不能为空字符串'
-    }])
-    validation.add(name, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少角色name信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'name不能为空字符串'
-    }])
-    validation.add(auths, [{
-      strategy: 'isArray',
-      errMsg: 'auths必须为数组'
-    }])
+    validation.add(code, [{ strategy: 'isNotHave', errMsg: '缺少code参数' }])
+    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
+    validation.add(auths, [{ strategy: 'isArray', errMsg: '参数类型不正确, auths必须为数组' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const role = new Role({code, name, auths})
-      return await role.save().catch(() => {
-        throw new Error('保存失败')
-      })
+      try {
+        const role = new Role({code, name, auths})
+        await role.save()
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -108,36 +94,23 @@ module.exports = {
    */
   async updateRole (ctx, id, name, auths = []) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少用户id信息'
-    }])
-    validation.add(name, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少角色name信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: 'name不能为空字符串'
-    }])
-    validation.add(auths, [{
-      strategy: 'isArray',
-      errMsg: 'auths必须为数组'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
+    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
+    validation.add(auths, [{ strategy: 'isArray', errMsg: '参数类型不正确, auths必须为数组' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      return await Role.findByIdAndUpdate({
-        _id: id
-      }, {
-        $set: {
-          name: name,
-          auths: auths
-        }
-      }).catch(() => {
-        throw new Error('更新失败')
-      })
+      try {
+        await Role.findByIdAndUpdate({
+          _id: id
+        }, {
+          $set: {
+            name: name,
+            auths: auths
+          }
+        })
+      } catch (error) {
+        throw error
+      }
     } else {
       ctx.throw(400, errMsg)
     }
@@ -146,24 +119,16 @@ module.exports = {
   /**
    * TODO:
    * MongoDB4.0支持事务
-   * 删除角色信息, 因为用户表关联了角色信息，所以需要将用户表中对应的角色id同时删除了
    * @param {String} id 角色的ObjectId
    */
   async deleteRole (ctx, id) {
     const validation = new Validation()
-    validation.add(id, [{
-      strategy: 'isNotEmpty',
-      errMsg: '缺少用户id信息'
-    }, {
-      strategy: 'isNotNullString',
-      errMsg: '缺少用户id信息'
-    }])
+    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      // 事务开始
-      const session = await mongoose.startSession()
-      session.startTransaction()
       try {
+        const session = await mongoose.startSession()
+        session.startTransaction()
         await User.updateMany({
           roles: {
             $all: [id]
@@ -176,14 +141,12 @@ module.exports = {
         await Role.findByIdAndRemove({
           _id: id
         })
-        // 事务结束
         await session.commitTransaction()
         session.endSession()
       } catch (error) {
-        // 事务回滚
         await session.abortTransaction()
         session.endSession()
-        throw new Error('删除角色失败')
+        throw error
       }
     } else {
       ctx.throw(400, errMsg)

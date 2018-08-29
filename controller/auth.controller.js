@@ -110,9 +110,9 @@ module.exports = {
     validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      const session = await mongoose.startSession()
-      session.startTransaction()
       try {
+        const session = await mongoose.startSession()
+        session.startTransaction()
         await Role.updateMany({
           auths: {
             $all: [id]
