@@ -25,9 +25,12 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       try {
-        const list = await User.find(null, '_id name createDate', {
+        const list = await User.find(null, '_id name createDate roles', {
           skip: skips,
           limit: pagesize
+        }).populate({
+          path: 'roles',
+          select: 'name'
         })
         const count = await User.find(null).count()
         return {

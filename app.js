@@ -17,7 +17,7 @@ const ReplyRouter = require('./routes/reply')
 
 mongo.connect()
 app.use(cors({
-  origin: 'http://127.0.0.1:8080',
+  origin: '*',
   credentials: true,
   methods: ['PUT', 'POST', 'GET', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
