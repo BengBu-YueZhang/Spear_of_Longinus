@@ -7,6 +7,7 @@ const isAuth = require('../middleware/isAuth')
  * 帖子列表
  * @api /post/list
  * @method GET
+ * TODO: 测试完成
  */
 router.get('/list', async (ctx, next) => {
   const { pagestart, pagesize } = ctx.request.query
@@ -25,6 +26,7 @@ router.get('/list', async (ctx, next) => {
  * 帖子详情
  * @api /post
  * @method GET
+ * TODO: 测试完成
  */
 router.get('/', async (ctx, next) => {
   const { postId, pagestart, pagesize } = ctx.request.query
@@ -43,6 +45,7 @@ router.get('/', async (ctx, next) => {
  * 添加一条帖子
  * @api /post
  * @method POST
+ * TODO: 测试完成
  */
 router.post('/', isAuth(), async (ctx, next) => {
   const { title, detail } = ctx.request.body
@@ -60,9 +63,10 @@ router.post('/', isAuth(), async (ctx, next) => {
  * 删除一条帖子
  * @api /post
  * @method DELETE
+ * TODO: 测试完成
  */
-router.delete('/', async (ctx, next) => {
-  const { postId, createdBy } = ctx.request.body
+router.delete('/', isAuth(), async (ctx, next) => {
+  const { postId, createdBy } = ctx.request.query
   await PostController.deletePost(ctx, postId, createdBy)
   ctx.result = {
     code: 200,
@@ -77,6 +81,7 @@ router.delete('/', async (ctx, next) => {
  * 增加一条浏览量
  * @api /post/views
  * @method POST
+ * TODO: 测试完成
  */
 router.post('/views', async (ctx, next) => {
   const { postId } = ctx.request.body

@@ -14,9 +14,9 @@ module.exports = {
     validation.add(detail, [{ strategy: 'isNotHave', errMsg: '缺少detail参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
+      const session = await mongoose.startSession()
+      session.startTransaction()
       try {
-        const session = await mongoose.startSession()
-        session.startTransaction()
         const { id } = ctx.decoded
         let relpy = new Relpy({
           postId,
@@ -24,8 +24,7 @@ module.exports = {
           createdBy: id
         })
         relpy = await relpy.save()
-        console.log(relpy)
-        await PostController.addReply(ctx, relpy._id, postId)
+        await PostController.addReply(ctx, relpy._id.toString(), postId)
         await session.commitTransaction()
         session.endSession()
       } catch (error) {
@@ -41,23 +40,29 @@ module.exports = {
   /**
    * 删除一条回复
    */
-  async deleteReply (ctx, id, createdBy) {
+  async deleteReply (ctx, postId, replyId, createdBy) {
     const validation = new Validation()
-    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少replyId参数' }])
+    validation.add(createdBy, [{ strategy: 'isNotHave', errMsg: '缺少createdBy参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
+      const session = await mongoose.startSession()
+      session.startTransaction()
       try {
+        const { roles, id } = ctx.decoded
         if (!isAuth(roles, 'post', 'delete_other')) {
           if (createdBy !== id) {
             throw new Error('只能删除自己发布的帖子')
           }
         }
-        await Relpy.deleteOne({
-          $eq: {
-            _id: id
-          }
-        })
+        await Relpy.findByIdAndRemove(replyId)
+        await PostController.deleteReply(ctx, postId)
+        await session.commitTransaction()
+        session.endSession()
       } catch (error) {
+        await session.abortTransaction()
+        session.endSession()
         throw error
       }
     } else {

@@ -25,10 +25,15 @@ module.exports = {
             skip: skips,
             limit: pagesize
           }
-        ).populate({
-          path: 'users'
+        ).sort({
+          topping: -1,
+          createdAt: -1,
         }).populate({
-          path: 'replys'
+          path: 'createdBy',
+          select: '_id name'
+        }).populate({
+          path: 'lastReply',
+          select: 'postId detail createdAt createdBy _id'
         })
         const count = await Post.count()
         return {
@@ -57,22 +62,31 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       try {
+        // 主题内容
         const post = await Post.findById({
           _id: postId
+        }).sort({
+          createdAt: -1
         }).populate({
-          path: 'users'
+          path: 'createdBy',
+          select: '_id name'
         }).populate({
-          path: 'replys'
+          path: 'lastReply',
+          select: 'postId detail createdAt createdBy _id'
         })
+        // 回复内容
         const replys = await Reply.find({
           _id: postId          
         }, 'detail createdAt createdBy', {
           skip: skips,
           limit: pagesize
         }).populate({
-          path: 'users'
+          path: 'createdBy'
         })
-        return Promise.resolve({ ...post, replys })
+        return {
+          post: post,
+          replys: replys
+        }
       } catch (error) {
         throw error
       }
@@ -115,8 +129,11 @@ module.exports = {
   async deletePost (ctx, postId, createdBy) {
     const validation = new Validation()
     validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺失postId参数' }])
+    validation.add(createdBy, [{ strategy: 'isNotHave', errMsg: '缺失createdBy参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
+      const session = await mongoose.startSession()
+      session.startTransaction()
       try {
         const { roles, id } = ctx.decoded
         if (!isAuth(roles, 'post', 'delete_other')) {
@@ -124,12 +141,10 @@ module.exports = {
             throw new Error('只能删除自己发布的帖子')
           }
         }
-        const session = await mongoose.startSession()
-        session.startTransaction()
         await Post.findByIdAndRemove(postId)
         await Reply.deleteMany({
-          $eq: {
-            postId: postId
+          postId: {
+            $eq: postId
           }
         })
         await session.commitTransaction()
@@ -157,8 +172,8 @@ module.exports = {
       try {
         await Post.updateMany(
           {
-            $eq: {
-              _id: postId
+            _id: {
+              $eq: postId
             }
           },
           {
@@ -190,24 +205,26 @@ module.exports = {
       try {
         const result = await Reply.findOne(
           {
-            $eq: {
-              postId: postId
+            postId: {
+              $eq: postId
             }
           },
           '_id'
         ).sort({
           createdAt: -1
         })
-        console.log(result)
         await Post.updateOne(
           {
-            $eq: {
-              _id: postId
+            _id: {
+              $eq: postId
             }
           },
           {
             $inc: {
               replyLength: -1
+            },
+            $set: {
+              lastReply: result ? result._id : null
             }
           }
         )
@@ -224,7 +241,7 @@ module.exports = {
    */
   async addPageviews (ctx, postId) {
     const validation = new Validation()
-    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
@@ -246,11 +263,11 @@ module.exports = {
 
   /**
    * 设置帖子是否置顶
-   * TODO: 列表查询语句需要更改
    */
   async setTopping (ctx, postId, topping) {
+    topping = parseInt(topping, 10)
     const validation = new Validation()
-    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     validation.add(topping, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     const errMsg = validation.start()
     if (!errMsg) {
@@ -275,16 +292,17 @@ module.exports = {
    * 设置帖子是否加精
    */
   async setEssence (ctx, postId, essence) {
+    essence = parseInt(essence, 10)
     const validation = new Validation()
-    validation.add(replyId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
+    validation.add(postId, [{ strategy: 'isNotHave', errMsg: '缺少postId参数' }])
     validation.add(essence, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
         await Post.updateOne(
           {
-            $eq: {
-              _id: postId
+            _id: {
+              $eq: postId
             }
           },
           {

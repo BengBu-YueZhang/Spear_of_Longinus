@@ -3,13 +3,15 @@ const router = new Router({
   prefix: '/reply'
 })
 const ReplyController = require('../controller/reply.controller')
+const isAuth = require('../middleware/isAuth')
 
 /**
  * 添加一条回复
  * @api /reply
  * @method POST
+ * TODO: 测试完成
  */
-router.post('/', async (ctx, next) => {
+router.post('/', isAuth(), async (ctx, next) => {
   const { postId, detail } = ctx.request.body
   await ReplyController.addReply(ctx, postId, detail)
   ctx.result = {
@@ -26,13 +28,12 @@ router.post('/', async (ctx, next) => {
  * @api /reply
  * @method DELETE
  */
-router.delete('/', async (ctx, next) => {
-  const { id, createdBy } = ctx.request.query
-  await ReplyController.deleteReply(ctx, id, createdBy)
+router.delete('/', isAuth(), async (ctx, next) => {
+  const { postId, id, createdBy } = ctx.request.query
+  await ReplyController.deleteReply(ctx, postId, id, createdBy)
   ctx.result = {
     code: 200,
     data: {
-      list: result,
       msg: 'success'
     }
   }
