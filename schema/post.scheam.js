@@ -58,4 +58,12 @@ const PostSchema = new Schema({
   }
 })
 
+PostSchema.options.toObject = {
+  transform (doc, ret) {
+    ret.id = doc._id
+    delete ret._id
+    return ret
+  }
+}
+
 module.exports = PostSchema

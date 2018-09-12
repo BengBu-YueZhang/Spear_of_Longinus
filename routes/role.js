@@ -12,11 +12,12 @@ const router = new Router({
  */
 router.get('/list', async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
-  const result = await RoleController.getRoles(ctx, pagestart, pagesize)
+  const { list, total } = await RoleController.getRoles(ctx, pagestart, pagesize)
   ctx.result = {
     code: 200,
     data: {
-      list: result,
+      list,
+      total,
       msg: 'success'
     }
   }
