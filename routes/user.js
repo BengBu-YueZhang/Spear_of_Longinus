@@ -56,8 +56,8 @@ router.post('/', isAuth(), async (ctx, next) => {
  * TODO: 调试完成
  */
 router.put('/', isAuth(), async (ctx, next) => {
-  let { id, name } = ctx.request.body
-  await UserController.updateUser(ctx, id, name)
+  let { id, name, roles } = ctx.request.body
+  await UserController.updateUser(ctx, id, name, roles)
   ctx.result = {
     code: 200,
     data: {

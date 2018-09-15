@@ -106,11 +106,13 @@ module.exports = {
    * 角色用专门的接口，进行修改。密码进过了加盐只能重置，不能修改
    * @param {String} id 用户的objectid
    * @param {String} name 更新的用户名
+   * @param {Array} roles 角色集合
    */
-  async updateUser (ctx, id, name) {
+  async updateUser (ctx, id, name, roles) {
     const validation = new Validation()
     validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
+    validation.add(roles, [{ strategy: 'isArray', errMsg: 'roles参数类型不正确' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
@@ -118,7 +120,8 @@ module.exports = {
           _id: id
         }, {
           $set: {
-            name: name
+            name: name,
+            roles: roles
           }
         })
       } catch (error) {
