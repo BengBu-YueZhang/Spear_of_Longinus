@@ -93,10 +93,10 @@ router.delete('/', isAuth(), async (ctx, next) => {
  */
 router.get('/list', isAuth(), async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
-  const result = await UserController.getUsers(ctx, pagestart, pagesize)
+  const { list, total } = await UserController.getUsers(ctx, pagestart, pagesize)
   ctx.result = {
     code: 200,
-    data: { data: result, msg: 'success' }
+    data: { list, total, msg: 'success' }
   }
   await next()
 })

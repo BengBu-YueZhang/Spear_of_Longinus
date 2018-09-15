@@ -27,10 +27,10 @@ module.exports = {
             limit: pagesize
           }
         )
-        const count = await Role.find().count()
+        const total = await Role.find().count()
         return {
           list,
-          count
+          total
         }
       } catch (error) {
         throw error

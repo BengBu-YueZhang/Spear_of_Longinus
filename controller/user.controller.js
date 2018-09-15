@@ -32,10 +32,10 @@ module.exports = {
           path: 'roles',
           select: 'name'
         })
-        const count = await User.find(null).count()
+        const total = await User.find(null).count()
         return {
           list,
-          count
+          total
         }
       } catch (error) {
         throw error
