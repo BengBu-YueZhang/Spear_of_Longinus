@@ -3,6 +3,7 @@ const UserController = require('../controller/user.controller')
 const router = new Router({
   prefix: '/user'
 })
+const isAuth = require('../middleware/isAuth')
 
 /**
  * 全部的路由使用中间件:
@@ -17,7 +18,7 @@ const router = new Router({
  * @method GET
  * TODO: 测试完成
  */
-router.get('/', async (ctx, next) => {
+router.get('/', isAuth(), async (ctx, next) => {
   let { id } = ctx.request.query
   const result = await UserController.getUser(ctx, id)
   ctx.result = {
@@ -36,7 +37,7 @@ router.get('/', async (ctx, next) => {
  * @method POST
  * TODO: 测试完成
  */
-router.post('/', async (ctx, next) => {
+router.post('/', isAuth(), async (ctx, next) => {
   let { name, password, roles } = ctx.request.body
   await UserController.addUser(ctx, name, password, roles)
   ctx.result = {
@@ -54,7 +55,7 @@ router.post('/', async (ctx, next) => {
  * @method PUT
  * TODO: 调试完成
  */
-router.put('/', async (ctx, next) => {
+router.put('/', isAuth(), async (ctx, next) => {
   let { id, name } = ctx.request.body
   await UserController.updateUser(ctx, id, name)
   ctx.result = {
@@ -72,7 +73,7 @@ router.put('/', async (ctx, next) => {
  * @method DELETE
  * TODO: 调试完成
  */
-router.delete('/', async (ctx, next) => {
+router.delete('/', isAuth(), async (ctx, next) => {
   let { id } = ctx.request.query
   await UserController.deleteUser(ctx, id)
   ctx.result = {
@@ -90,7 +91,7 @@ router.delete('/', async (ctx, next) => {
  * @method GET
  * TODO: 测试完成
  */
-router.get('/list', async (ctx, next) => {
+router.get('/list', isAuth(), async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
   const result = await UserController.getUsers(ctx, pagestart, pagesize)
   ctx.result = {
@@ -126,7 +127,7 @@ router.post('/login', async (ctx, next) => {
  * @method GET
  * TODO: 测试完成
  */
-router.post('/logout', async (ctx, next) => {
+router.post('/logout', isAuth(), async (ctx, next) => {
   let { id } = ctx.request.body
   await UserController.logout(ctx, id)
   ctx.result = {

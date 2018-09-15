@@ -38,7 +38,7 @@ module.exports = function (model, auth) {
         try {
           acl.areAnyRolesAllowed(roles, model, auth)
         } catch (error) {
-          ctx.throw(403, '接口你没有权限')
+          ctx.throw(403, '缺少接口权限')
         }
         await next()
       }
