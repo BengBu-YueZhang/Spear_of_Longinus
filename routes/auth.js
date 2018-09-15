@@ -9,7 +9,7 @@ const router = new Router({
  * @api /auth/list
  * TODO: 测试完成
  */
-router.get('/list', async (ctx, next) => {
+router.get('/list', isAuth(), async (ctx, next) => {
   const { pagestart, pagesize } = ctx.request.query
   const result = await AuthController.getAuths(ctx, pagestart, pagesize)
   ctx.result = {
@@ -28,7 +28,7 @@ router.get('/list', async (ctx, next) => {
  * @method GET
  * TODO: 测试完成
  */
-router.get('/', async (ctx, next) => {
+router.get('/', isAuth(), async (ctx, next) => {
   const { id } = ctx.request.query
   const result = await AuthController.getAuth(ctx, id)
   ctx.result = {
@@ -47,7 +47,7 @@ router.get('/', async (ctx, next) => {
  * @method POST
  * TODO: 测试完成
  */
-router.post('/', async (ctx, next) => {
+router.post('/', isAuth(), async (ctx, next) => {
   const { code, name, group } = ctx.request.body
   await AuthController.addAuth(ctx, code, name, group)
   ctx.result = {
@@ -65,7 +65,7 @@ router.post('/', async (ctx, next) => {
  * @method PUT
  * TODO: 测试完成
  */
-router.put('/', async (ctx, next) => {
+router.put('/', isAuth(), async (ctx, next) => {
   const { id, name, group } = ctx.request.body
   await AuthController.updateAuth(ctx, id, name, group)
   ctx.result = {
@@ -84,7 +84,7 @@ router.put('/', async (ctx, next) => {
  * @method DELETE
  * TODO: 测试完成
  */
-router.delete('/', async (ctx, next) => {
+router.delete('/', isAuth(), async (ctx, next) => {
   const { id } = ctx.request.query
   await AuthController.deleteAuth(ctx, id)
   ctx.result = {
@@ -102,7 +102,7 @@ router.delete('/', async (ctx, next) => {
  * @method GET
  * TODO: 测试完成
  */
-router.get('/group', async (ctx, next) => {
+router.get('/group', isAuth(), async (ctx, next) => {
   const result = await AuthController.getAuthGroup()
   ctx.result = {
     code: 200,
@@ -120,7 +120,7 @@ router.get('/group', async (ctx, next) => {
  * @method DELETE
  * TODO: 测试完成
  */
-router.delete('/group', async (ctx, next) => {
+router.delete('/group', isAuth(), async (ctx, next) => {
   const { group } = ctx.request.query
   await AuthController.deleteAuthGroup(ctx, group)
   ctx.result = {
@@ -138,7 +138,7 @@ router.delete('/group', async (ctx, next) => {
  * @method PUT
  * TODO: 测试完成
  */
-router.put('/group', async (ctx, next) => {
+router.put('/group', isAuth(), async (ctx, next) => {
   const { group, newGroup } = ctx.request.body
   await AuthController.updeateAuthGroup(ctx, group, newGroup)
   ctx.result = {

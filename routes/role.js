@@ -3,6 +3,7 @@ const RoleController = require('../controller/role.controller')
 const router = new Router({
   prefix: '/role'
 })
+const isAuth = require('../middleware/isAuth')
 
 /**
  * 获取角色列表
@@ -10,7 +11,7 @@ const router = new Router({
  * @method GET
  * TODO: 测试完成
  */
-router.get('/list', async (ctx, next) => {
+router.get('/list', isAuth(), async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
   const { list, total } = await RoleController.getRoles(ctx, pagestart, pagesize)
   ctx.result = {
@@ -30,7 +31,7 @@ router.get('/list', async (ctx, next) => {
  * @method GET
  * TODO: 测试完成
  */
-router.get('/', async (ctx, next) => {
+router.get('/', isAuth(), async (ctx, next) => {
   const { id } = ctx.request.query
   const result = await RoleController.getRole(ctx, id)
   ctx.result = {
@@ -49,7 +50,7 @@ router.get('/', async (ctx, next) => {
  * @method POST
  * TODO: 测试完成
  */
-router.post('/', async (ctx, next) => {
+router.post('/', isAuth(), async (ctx, next) => {
   const { code, name, auths } = ctx.request.body
   await RoleController.addRole(ctx, code, name, auths)
   ctx.result = {
@@ -67,7 +68,7 @@ router.post('/', async (ctx, next) => {
  * @method PUT
  * TODO: 测试完成
  */
-router.put('/', async (ctx, next) => {
+router.put('/', isAuth(), async (ctx, next) => {
   const { id, name, auths } = ctx.request.body
   await RoleController.updateRole(ctx, id, name, auths)
   ctx.result = {
@@ -85,7 +86,7 @@ router.put('/', async (ctx, next) => {
  * @method DELETE
  * TODO: 测试完成
  */
-router.delete('/', async (ctx, next) => {
+router.delete('/', isAuth(), async (ctx, next) => {
   const { id, } = ctx.request.query
   await RoleController.deleteRole(ctx, id)
   ctx.result = {

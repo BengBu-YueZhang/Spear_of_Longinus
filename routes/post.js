@@ -100,7 +100,7 @@ router.post('/views', async (ctx, next) => {
  * @api /post/topping
  * @method POST
  */
-router.post('/topping', async (ctx, next) => {
+router.post('/topping', isAuth(), async (ctx, next) => {
   const { postId, topping } = ctx.request.body
   await PostController.setTopping(ctx, postId, topping)
   ctx.result = {
@@ -117,7 +117,7 @@ router.post('/topping', async (ctx, next) => {
  * @api /post/essence
  * @method POST
  */
-router.post('/essence', async (ctx, next) => {
+router.post('/essence', isAuth(), async (ctx, next) => {
   const { postId, essence } = ctx.request.body
   await PostController.setEssence(ctx, postId, essence)
   ctx.result = {
