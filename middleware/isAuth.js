@@ -13,9 +13,9 @@ const acl = require('./../config/acl').acl
  */
 module.exports = function (model, auth) {
   return async function (ctx, next) {
-    // const token = ctx.headers['x-access-token']
+    const token = ctx.headers['x-access-token']
     // TODO: 方便测试展示写死token
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjViOGI1NzY0ZjE2YzJhMDM2MmRiOGYwNyIsInJvbGVzIjpbIjViODgwMzE1NzY5ZjEzMTBjZTcyMjEzNCJdLCJpYXQiOjE1MzU4NTg1NzksImV4cCI6MTUzNTk0NDk3OX0.Dpf_ju5sCjUIlqJPYPOkQ6uxW54itN_si3lTyhBwPp8'
+    // const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjViOGI1NzY0ZjE2YzJhMDM2MmRiOGYwNyIsInJvbGVzIjpbIjViODgwMzE1NzY5ZjEzMTBjZTcyMjEzNCJdLCJpYXQiOjE1MzU4NTg1NzksImV4cCI6MTUzNTk0NDk3OX0.Dpf_ju5sCjUIlqJPYPOkQ6uxW54itN_si3lTyhBwPp8'
     if (token) {
       // token验证
       let decoded = null
