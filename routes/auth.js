@@ -11,8 +11,8 @@ const isAuth = require('../middleware/isAuth')
  * TODO: 测试完成
  */
 router.get('/list', isAuth(), async (ctx, next) => {
-  const { pagestart, pagesize } = ctx.request.query
-  const result = await AuthController.getAuths(ctx, pagestart, pagesize)
+  const { pagestart, pagesize, group } = ctx.request.query
+  const result = await AuthController.getAuths(ctx, pagestart, pagesize, group)
   ctx.result = {
     code: 200,
     data: {

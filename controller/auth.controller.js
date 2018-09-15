@@ -7,18 +7,20 @@ module.exports = {
   /**
    * 获取权限列表
    */
-  async getAuths (ctx, pagestart = 1, pagesize = 10) {
+  async getAuths (ctx, pagestart = 1, pagesize = 10, group = '') {
     pagestart = parseInt(pagestart, 10)
     pagesize = parseInt(pagesize, 10)
     skips = pagesize * (pagestart - 1)
     const validation = new Validation()
+    let query = {}
     validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确, pagestart必须为数字' }])
     validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确, pagesize必须为数字' }])
     const errMsg = validation.start()
     if (!errMsg) {
+      if (group) query = { ...query, group }
       try {
         const list = await Auth.find(
-          null,
+          query,
           null,
           {
             skip: skips,
