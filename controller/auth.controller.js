@@ -17,7 +17,7 @@ module.exports = {
     validation.add(pagesize, [{ strategy: 'isNumber', errMsg: '参数类型不正确, pagesize必须为数字' }])
     const errMsg = validation.start()
     if (!errMsg) {
-      if (group) query = { ...query, group }
+      if (group && group !== 'all') query = { ...query, group }
       try {
         const list = await Auth.find(
           query,
