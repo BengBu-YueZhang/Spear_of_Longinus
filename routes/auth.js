@@ -3,6 +3,7 @@ const AuthController = require('../controller/auth.controller')
 const router = new Router({
   prefix: '/auth'
 })
+const isAuth = require('../middleware/isAuth')
 
 /**
  * 获取权限列表
