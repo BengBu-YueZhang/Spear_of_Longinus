@@ -183,16 +183,9 @@ module.exports = {
 
   /**
    * 用户登出
-   * @param {String} id 用户的ObjectId
    */
-  async logout (ctx, id) {
-    const validation = new Validation()
-    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
-    const errMsg = validation.start()
-    if (!errMsg) {
-      await delAsync(id)
-    } else {
-      ctx.throw(400, errMsg)
-    }
+  async logout (ctx) {
+    const { id } = ctx.decoded
+    await delAsync(id)
   }
 }

@@ -128,8 +128,7 @@ router.post('/login', async (ctx, next) => {
  * TODO: 测试完成
  */
 router.post('/logout', isAuth(), async (ctx, next) => {
-  let { id } = ctx.request.body
-  await UserController.logout(ctx, id)
+  await UserController.logout(ctx)
   ctx.result = {
     code: 200,
     data: {
