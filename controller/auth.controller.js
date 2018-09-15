@@ -25,10 +25,10 @@ module.exports = {
             limit: pagesize
           }
         )
-        const count = await Auth.find().count()
+        const total = await Auth.find().count()
         return {
           list,
-          count
+          total
         }
       } catch (error) {
         throw error
