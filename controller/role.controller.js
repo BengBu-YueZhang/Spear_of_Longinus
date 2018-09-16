@@ -99,16 +99,19 @@ module.exports = {
   async updateRole (ctx, update) {
     let role = {}
     const validation = new Validation()
-    const { id } = update
+    let { id, name, auths } = update
     validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
+        role = { id }
+        if (name) role = { ...role, name }
+        if (auths) auths = { ...role, auths }
         await Role.findByIdAndUpdate({
           _id: id
         }, {
           $set: {
-            ...update
+            ...role
           }
         })
       } catch (error) {
