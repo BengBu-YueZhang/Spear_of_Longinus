@@ -70,7 +70,7 @@ router.post('/', isAuth(), async (ctx, next) => {
  */
 router.put('/', isAuth(), async (ctx, next) => {
   const { id, name, auths } = ctx.request.body
-  await RoleController.updateRole(ctx, id, name, auths)
+  await RoleController.updateRole(ctx, { id, name, auths })
   ctx.result = {
     code: 200,
     data: {

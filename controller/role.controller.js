@@ -96,11 +96,11 @@ module.exports = {
    * @param {String} name 角色名
    * @param {Array} auths 角色权限集
    */
-  async updateRole (ctx, id, name, auths = []) {
+  async updateRole (ctx, update) {
+    let role = {}
     const validation = new Validation()
+    const { id } = update
     validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
-    validation.add(name, [{ strategy: 'isNotHave', errMsg: '缺少name参数' }])
-    validation.add(auths, [{ strategy: 'isArray', errMsg: '参数类型不正确, auths必须为数组' }])
     const errMsg = validation.start()
     if (!errMsg) {
       try {
@@ -108,8 +108,7 @@ module.exports = {
           _id: id
         }, {
           $set: {
-            name: name,
-            auths: auths
+            ...update
           }
         })
       } catch (error) {
