@@ -35,7 +35,7 @@ module.exports = function (model, auth) {
       if (!model || !auth) {
         await next()
       } else {
-        await acl.areAnyRolesAllowed(roles, model, auth).then((err, allowed) => {
+        await acl.areAnyRolesAllowed(roles, model, auth).then((err) => {
           if (!err) {
             ctx.throw(403, '缺少接口权限')
           }
