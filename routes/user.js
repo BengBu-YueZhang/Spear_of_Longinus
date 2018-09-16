@@ -91,7 +91,7 @@ router.delete('/', isAuth(), async (ctx, next) => {
  * @method GET
  * TODO: 测试完成
  */
-router.get('/list', isAuth(), async (ctx, next) => {
+router.get('/list', isAuth('menu', 'userlist_menu'), async (ctx, next) => {
   let { pagestart, pagesize } = ctx.request.query
   const { list, total } = await UserController.getUsers(ctx, pagestart, pagesize)
   ctx.result = {

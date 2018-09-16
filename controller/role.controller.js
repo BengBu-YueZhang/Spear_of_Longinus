@@ -106,7 +106,7 @@ module.exports = {
       try {
         role = { id }
         if (name) role = { ...role, name }
-        if (auths) auths = { ...role, auths }
+        if (auths) role = { ...role, auths }
         await Role.findByIdAndUpdate({
           _id: id
         }, {

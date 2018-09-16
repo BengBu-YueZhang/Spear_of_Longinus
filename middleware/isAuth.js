@@ -35,11 +35,11 @@ module.exports = function (model, auth) {
       if (!model || !auth) {
         await next()
       } else {
-        try {
-          acl.areAnyRolesAllowed(roles, model, auth)
-        } catch (error) {
-          ctx.throw(403, '缺少接口权限')
-        }
+        await acl.areAnyRolesAllowed(roles, model, auth).then((err, allowed) => {
+          if (!err) {
+            ctx.throw(403, '缺少接口权限')
+          }
+        })
         await next()
       }
     } else {

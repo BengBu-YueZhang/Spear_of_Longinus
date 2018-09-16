@@ -168,11 +168,15 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       try {
-        const user = await User.findOne({ name })
+        const user = await User.findOne({ name }).populate({
+          path: 'roles',
+          select: 'code'
+        })
         if (!user) throw new Error('用户不存在')
         const equal = await bcrypt.compare(user.password, password)
         if (!equal) throw new Error('用户或密码错误')
-        const token = jwt.sign({ id: user._id, roles: user.roles }, secret, { expiresIn: timeout })
+        
+        const token = jwt.sign({ id: user._id, roles: user.roles.map(r => r.code) }, secret, { expiresIn: timeout })
         const redisKey = user._id.toString()
         await setAsync(redisKey, token, 'EX', timeout)
         return token
