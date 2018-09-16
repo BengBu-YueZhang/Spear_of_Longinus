@@ -37,7 +37,10 @@ router.get('/', isAuth(), async (ctx, next) => {
   ctx.result = {
     code: 200,
     data: {
-      data: result,
+      auths: result.auths,
+      code: result.code,
+      id: result.id,
+      name: result.name,
       msg: 'success'
     }
   }
