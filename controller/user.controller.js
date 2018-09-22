@@ -189,6 +189,22 @@ module.exports = {
   },
 
   /**
+   * 获取当前登录用户的详情信息（使用token中信息）
+   */
+  async getCurrentUser (ctx, next) {
+    const { id } = ctx.decoded
+    const result = await this.getUser(ctx, next)
+    ctx.result = {
+      code: 200,
+      data: {
+        ...result,
+        msg: 'success'
+      }
+    }
+    await next()
+  },
+
+  /**
    * 用户登出
    */
   async logout (ctx) {

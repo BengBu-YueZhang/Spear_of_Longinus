@@ -122,6 +122,13 @@ router.post('/login', async (ctx, next) => {
 })
 
 /**
+ * 获取当前登录用户的详情
+ * @api /user/current
+ * @method GET
+ */
+router.get('/current', isAuth(), UserController.getCurrentUser)
+
+/**
  * 用户登出
  * @api /user/logout
  * @method GET
