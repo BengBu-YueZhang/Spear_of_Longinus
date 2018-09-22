@@ -17,3 +17,4 @@
 - [ ] mongo信息同步到elasticsearch的定时任务功能
 - [ ] 添加elasticsearch实现整个系统全文检索的功能
 - [ ] 使用TypeScript重构整个项目
+- [ ] 完事的单元测试
