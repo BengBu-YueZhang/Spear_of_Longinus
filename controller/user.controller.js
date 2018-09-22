@@ -9,6 +9,35 @@ const delAsync = promisify(redisClient.del).bind(redisClient)
 const Validation = require('../util/Validation')
 const jwt = require('jsonwebtoken')
 
+/**
+ * 获取用户的信息
+ * @param {String} id 用户的_id
+ */
+async function getUser (ctx, id) {
+  const validation = new Validation()
+  validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
+  const errMsg = validation.start()
+  if (!errMsg) {
+    try {
+      return await User.findById(
+        {
+          _id: id
+        },
+        'createDate name roles'
+      ).populate({
+        path: 'roles',
+        populate: {
+          path: 'auths'
+        }
+      })
+    } catch (error) {
+      throw error
+    }
+  } else {
+    ctx.throw(400, errMsg)
+  }
+}
+
 module.exports = {
   /**
    * 用户列表
@@ -45,34 +74,7 @@ module.exports = {
     }
   },
 
-  /**
-   * 获取用户的信息
-   * @param {String} id 用户的_id
-   */
-  async getUser (ctx, id) {
-    const validation = new Validation()
-    validation.add(id, [{ strategy: 'isNotHave', errMsg: '缺少id参数' }])
-    const errMsg = validation.start()
-    if (!errMsg) {
-      try {
-        return await User.findById(
-          {
-            _id: id
-          },
-          'createDate name roles'
-        ).populate({
-          path: 'roles',
-          populate: {
-            path: 'auths'
-          }
-        })
-      } catch (error) {
-        throw error
-      }
-    } else {
-      ctx.throw(400, errMsg)
-    }
-  },
+  getUser,
 
   /**
    * 添加用户(用户注册)
@@ -193,11 +195,11 @@ module.exports = {
    */
   async getCurrentUser (ctx, next) {
     const { id } = ctx.decoded
-    const result = await this.getUser(ctx, next)
+    const result = await getUser(ctx, id)
     ctx.result = {
       code: 200,
       data: {
-        ...result,
+        ...result._doc,
         msg: 'success'
       }
     }
