@@ -23,7 +23,7 @@ async function getUser (ctx, id) {
         {
           _id: id
         },
-        'createDate name roles'
+        'name id roles'
       ).populate({
         path: 'roles',
         populate: {
@@ -198,10 +198,8 @@ module.exports = {
     const result = await getUser(ctx, id)
     ctx.result = {
       code: 200,
-      data: {
-        ...result._doc,
-        msg: 'success'
-      }
+      data: result,
+      msg: 'success'
     }
     await next()
   },
