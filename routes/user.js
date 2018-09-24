@@ -4,6 +4,7 @@ const router = new Router({
   prefix: '/user'
 })
 const isAuth = require('../middleware/isAuth')
+const logs = require('../middleware/log')
 
 /**
  * 全部的路由使用中间件:
@@ -108,7 +109,7 @@ router.get('/list', isAuth('menu', 'userlist_menu'), async (ctx, next) => {
  * TODO: 测试完成
  * token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjViODEzODAyZTgwNDhkMGRkNmE1MjE3MiIsInJvbGVzIjpbXSwiaWF0IjoxNTM1NTM0NDg0LCJleHAiOjE1MzU2MjA4ODR9.oUZcIGPJqsl0u5l23Q7O_jtGT81UucAxyuC2ct92f78
  */
-router.post('/login', async (ctx, next) => {
+router.post('/login', logs(), async (ctx, next) => {
   let { name, password } = ctx.request.body
   const result = await UserController.login(ctx, name, password)
   ctx.result = {
