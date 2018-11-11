@@ -34,13 +34,12 @@ const logs = () => {
     let originalUrl = ctx.originalUrl
     let method = ctx.method
     try {
+      await next()
       await log(
         `${method}-${originalUrl}-${ip}-${params}`,
         'request'
       )
-      await next()
     } catch (error) {
-      console.log(error.message)
       await log(
         `${method}-${originalUrl}-${ip}-${params}-${error.message}`,
         'error'

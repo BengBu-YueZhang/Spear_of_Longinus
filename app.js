@@ -3,6 +3,7 @@ const logger = require('koa-logger')
 const json = require('koa-json')
 const bodyParser = require('koa-bodyparser')
 const result = require('./middleware/result')
+const log = require('./middleware/log')
 const cors = require('@koa/cors');
 const mongo = require('./config/mongo')
 const redis = require('./config/redis')
@@ -33,6 +34,7 @@ app.use(bodyParser())
 app.use(json())
 app.use(logger())
 app.use(result())
+app.use(log())
 
 // 路由
 app.use(UserRouter.routes(), UserRouter.allowedMethods())
