@@ -40,11 +40,11 @@ const logs = () => {
       )
       await next()
     } catch (error) {
+      console.log(error.message)
       await log(
         `${method}-${originalUrl}-${ip}-${params}-${error.message}`,
         'error'
       )
-      await next()
     }
   }
 }
