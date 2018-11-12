@@ -321,12 +321,21 @@ module.exports = {
   },
 
   async statistics (ctx, next) {
-    const result = await Post.aggregate([
+    let start = moment().subtract(7, 'days').hour(0).minute(0).second(0).millisecond(0)
+    let end = moment().hour(23).minute(59).second(59).millisecond(999)
+    let initData = []
+    for (let i = 1; i < 8; i++) {
+      initData.push({
+        createdAt: moment().subtract(7, 'days').hour(0).minute(0).second(0).millisecond(0).add(i, 'days').format('YYYY-MM-DD'),
+        count: 0
+      })
+    }
+    let result = await Post.aggregate([
       {
         $match: {
           createdAt: {
-            $gt: moment().subtract(7, 'days').hour(0).minute(0).second(0).millisecond(0).toDate(),
-            $lt: moment().hour(23).minute(59).second(59).millisecond(999).toDate()
+            $gt: start.toDate(),
+            $lt: end.toDate()
           }
         }
       },
@@ -349,9 +358,22 @@ module.exports = {
         }
       }
     ])
+    result = result.map(r => {
+      return {
+        createdAt: r._id.createdAt,
+        count: r.count
+      }
+    })
+    initData = initData.map(i => {
+      let index = result.findIndex(v => v.createdAt === i.createdAt)
+      if (index > -1) {
+        i.count = result[index].count
+      }
+      return i
+    })
     ctx.result = {
       code: 200,
-      data: result,
+      data: initData,
       msg: 'success'
     }
     await next()
