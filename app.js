@@ -34,7 +34,7 @@ app.use(bodyParser())
 app.use(json())
 app.use(logger())
 app.use(result())
-app.use(log())
+// app.use(log())
 
 // 路由
 app.use(UserRouter.routes(), UserRouter.allowedMethods())

@@ -40,4 +40,9 @@ router.delete('/', isAuth(), async (ctx, next) => {
   await next()
 })
 
+/**
+ * 最近七天每一天的帖子回复数目
+ */
+router.get('/statistics', ReplyController.statistics)
+
 module.exports = router
