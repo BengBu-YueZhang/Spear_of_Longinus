@@ -68,5 +68,37 @@ module.exports = {
     } else {
       ctx.throw(400, errMsg)
     }
+  },
+
+  /***
+   * 统计时间范围内的每一天的回复数量
+   */
+  async statistics (ctx, next) {
+    const result = await Relpy.aggregate([
+      {
+        $project: {
+          formatCreatedAt: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt"
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id : {
+            createdAt: "$formatCreatedAt"
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ])
+    ctx.result = {
+      code: 200,
+      data: result,
+      msg: 'success'
+    }
+    await next()
   }
 }
