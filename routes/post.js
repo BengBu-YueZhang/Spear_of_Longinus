@@ -129,4 +129,9 @@ router.post('/essence', isAuth(), async (ctx, next) => {
   await next()
 })
 
+/**
+ * 最近七天每一天的发贴的数量
+ */
+router.get('/statistics', PostController.statistics)
+
 module.exports = router

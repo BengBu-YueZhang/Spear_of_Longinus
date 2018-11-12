@@ -3,6 +3,7 @@ const Post = require('../model/post.model')
 const Reply = require('../model/reply.model')
 const mongoose = require('mongoose')
 const isAuth = require('../config/acl').isAuth
+const moment = require('moment')
 
 module.exports = {
   /**
@@ -317,5 +318,42 @@ module.exports = {
     } else {
       ctx.throw(400, errMsg)
     }
+  },
+
+  async statistics (ctx, next) {
+    const result = await Post.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gt: moment().subtract(7, 'days').hour(0).minute(0).second(0).millisecond(0).toDate(),
+            $lt: moment().hour(23).minute(59).second(59).millisecond(999).toDate()
+          }
+        }
+      },
+      {
+        $project: {
+          formatCreatedAt: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt"
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id : {
+            createdAt: "$formatCreatedAt"
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ])
+    ctx.result = {
+      code: 200,
+      data: result,
+      msg: 'success'
+    }
+    await next()
   }
 }
