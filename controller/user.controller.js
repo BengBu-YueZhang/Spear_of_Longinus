@@ -234,9 +234,15 @@ module.exports = {
         }
       }
     ])
+    result = result.map(r => {
+      return {
+        createdAt: r._id.createdAt,
+        count: r.count
+      }
+    })
     ctx.result = {
       code: 200,
-      data: initData,
+      data: result,
       msg: 'success'
     }
     await next()
