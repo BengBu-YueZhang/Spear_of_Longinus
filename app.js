@@ -8,6 +8,7 @@ const cors = require('@koa/cors');
 const mongo = require('./config/mongo')
 const redis = require('./config/redis')
 const acl = require('./config/acl').initRole()
+const staticServe = require('koa-static')
 
 const app = new Koa()
 const UserRouter = require('./routes/user')
@@ -17,6 +18,8 @@ const PostRouter = require('./routes/post')
 const ReplyRouter = require('./routes/reply')
 
 mongo.connect()
+
+app.use(staticServe(__dirname + '/static/'))
 app.use(cors({
   origin: '*',
   credentials: true,
