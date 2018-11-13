@@ -145,4 +145,7 @@ router.post('/logout', isAuth(), async (ctx, next) => {
   await next()
 })
 
+// 过去6个月的用户注册数量
+router.get('/statistics', UserController.statistics)
+
 module.exports = router

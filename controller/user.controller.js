@@ -8,6 +8,7 @@ const setAsync = promisify(redisClient.set).bind(redisClient)
 const delAsync = promisify(redisClient.del).bind(redisClient)
 const Validation = require('../util/Validation')
 const jwt = require('jsonwebtoken')
+const moment = require('moment')
 
 /**
  * 获取用户的信息
@@ -210,5 +211,34 @@ module.exports = {
   async logout (ctx) {
     const { id } = ctx.decoded
     await delAsync(id)
+  },
+
+  async statistics (ctx, next) {
+    let result = await User.aggregate([
+      {
+        $project: {
+          formatCreateDate: {
+            $dateToString: {
+              format: "%Y-%m",
+              date: "$createDate"
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id : {
+            createdAt: "$formatCreateDate"
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ])
+    ctx.result = {
+      code: 200,
+      data: initData,
+      msg: 'success'
+    }
+    await next()
   }
 }
