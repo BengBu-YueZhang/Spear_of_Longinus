@@ -16,6 +16,7 @@ const RoleRouter = require('./routes/role')
 const AuthRouter = require('./routes/auth')
 const PostRouter = require('./routes/post')
 const ReplyRouter = require('./routes/reply')
+const UploadRouter = require('./routes/upload')
 
 mongo.connect()
 
@@ -45,6 +46,7 @@ app.use(RoleRouter.routes(), RoleRouter.allowedMethods())
 app.use(AuthRouter.routes(), AuthRouter.allowedMethods())
 app.use(PostRouter.routes(), PostRouter.allowedMethods())
 app.use(ReplyRouter.routes(), ReplyRouter.allowedMethods())
+app.use(UploadRouter.routes(), ReplyRouter.allowedMethods())
 
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
