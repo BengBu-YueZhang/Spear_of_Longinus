@@ -45,9 +45,13 @@ module.exports = {
    * @param {Number} pagestart 开始
    * @param {pagesize} pagesize 大小
    */
-  async getUsers (ctx, pagestart = 1, pagesize = 10) {
-    pagestart = parseInt(pagestart, 10)
-    pagesize = parseInt(pagesize, 10)
+  async getUsers (ctx, next) {
+    let { pagestart, pagesize, name, startAt, endAt } = ctx.request.query
+    pagestart = parseInt(pagestart, 10) || 1
+    pagesize = parseInt(pagesize, 10) || 10
+    name = name || { $ne: '' }
+    startAt = startAt || moment('1970-01-01').toDate()
+    endAt = endAt || moment('2100-01-01').toDate()
     skips = pagesize * (pagestart - 1)
     const validation = new Validation()
     validation.add(pagestart, [{ strategy: 'isNumber', errMsg: '参数类型不正确' }])
@@ -55,7 +59,13 @@ module.exports = {
     const errMsg = validation.start()
     if (!errMsg) {
       try {
-        const list = await User.find(null, '_id name createDate roles', {
+        const list = await User.find({
+          name: name,
+          createDate: {
+            $gte: startAt,
+            $lte: endAt
+          }
+        }, '_id name createDate roles', {
           skip: skips,
           limit: pagesize
         }).populate({
@@ -63,9 +73,9 @@ module.exports = {
           select: 'name'
         })
         const total = await User.find(null).count()
-        return {
-          list,
-          total
+        ctx.result = {
+          code: 200,
+          data: { list, total, msg: 'success' }
         }
       } catch (error) {
         throw error
@@ -73,6 +83,7 @@ module.exports = {
     } else {
       ctx.throw(400, errMsg)
     }
+    await next()
   },
 
   getUser,
